@@ -1,8 +1,12 @@
-# To change this template, choose Tools | Templates
-# and open the template in the editor.
-
 __author__="Giuseppe Tripoli"
 __date__ ="$14-mar-2012 20.30.02$"
 
-if __name__ == "__main__":
-    print "Hello World"
+
+class view_wxpyfw():
+    def __init__(self):
+        
+        self.popolate_treectrl()
+    
+    def popolate_treectrl(self):
+        pass
+    

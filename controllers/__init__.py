@@ -6,6 +6,7 @@ __date__ ="$14-mar-2012 20.03.26$"
 import wx
 import sys
 import wx.xrc
+import traceback
 
 from globals.obj_log import obj_log
 
@@ -13,7 +14,7 @@ logger = obj_log("wxPyFw.log")
 
 class window(wx.App):
     def OnInit(self):
-        self.res = wx.xrc.XmlResource('wxPyFw.xrc')
+        self.res = wx.xrc.XmlResource('gui\wxPyFw.xrc')
         self.init_frame()
         return True
 
@@ -26,7 +27,7 @@ class window(wx.App):
             self.sizer.Add( self.frame.panel, 1, wx.EXPAND | wx.ALL, 0 )
             self.frame.SetSizer( self.sizer )
 
-            self.init_menubar()
+            #self.init_menubar()
             
             self.frame.Layout()
             self.frame.Show()

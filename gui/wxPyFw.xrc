@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<resource xmlns="http://www.wxwindows.org/wxxrc" version="2.3.0.1">
+	<object class="wxFrame" name="main_frame">
+		<style>wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL</style>
+		<size>1024,640</size>
+		<title></title>
+		<centered>1</centered>
+		<aui_managed>0</aui_managed>
+		<object class="wxMenuBar" name="m_menubar1">
+			<label>MyMenuBar</label>
+			<object class="wxMenu" name="file">
+				<label>File</label>
+				<object class="wxMenuItem" name="new_project">
+					<label>Nuovo Progetto</label>
+					<help></help>
+				</object>
+			</object>
+		</object>
+		<object class="wxToolBar" name="m_toolBar1">
+			<style>wxTB_HORIZONTAL</style>
+			<bitmapsize></bitmapsize>
+			<margins></margins>
+			<packing>1</packing>
+			<separation>5</separation>
+			<object class="tool" name="m_tool1">
+				<label>tool</label>
+				<tooltip></tooltip>
+				<longhelp></longhelp>
+				<bitmap />
+			</object>
+			<object class="tool" name="m_tool2">
+				<label>tool</label>
+				<tooltip></tooltip>
+				<longhelp></longhelp>
+				<bitmap />
+			</object>
+			<object class="tool" name="m_tool3">
+				<label>tool</label>
+				<tooltip></tooltip>
+				<longhelp></longhelp>
+				<bitmap />
+			</object>
+		</object>
+		<object class="wxSplitterWindow" name="main_panel">
+			<style>wxSP_3D|wxSP_BORDER</style>
+			<sashpos>200</sashpos>
+			<gravity>0</gravity>
+			<minsize>0</minsize>
+			<orientation>vertical</orientation>
+			<object class="wxPanel" name="m_panel3">
+				<style>wxTAB_TRAVERSAL</style>
+				<object class="wxBoxSizer">
+					<orient>wxVERTICAL</orient>
+					<object class="sizeritem">
+						<option>1</option>
+						<flag>wxALL|wxEXPAND</flag>
+						<border>5</border>
+						<object class="wxTreeCtrl" name="m_treeCtrl2">
+							<style>wxTR_DEFAULT_STYLE</style>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxListCtrl" name="m_listCtrl1">
+							<style>wxLC_ICON</style>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxListBox" name="m_listBox1">
+							<content>
+								<item>u</item>
+								<item>g</item>
+							</content>
+						</object>
+					</object>
+				</object>
+			</object>
+			<object class="wxPanel" name="m_panel4">
+				<style>wxTAB_TRAVERSAL</style>
+				<object class="wxBoxSizer">
+					<orient>wxVERTICAL</orient>
+					<object class="sizeritem">
+						<option>1</option>
+						<flag>wxALL|wxEXPAND</flag>
+						<border>5</border>
+						<object class="wxTextCtrl" name="m_textCtrl1">
+							<style>wxTE_MULTILINE|wxTE_PROCESS_ENTER|wxTE_PROCESS_TAB|wxTE_WORDWRAP</style>
+							<value></value>
+							<maxlength>0</maxlength>
+						</object>
+					</object>
+				</object>
+			</object>
+		</object>
+		<object class="wxStatusBar" name="m_statusBar1">
+			<style>wxST_SIZEGRIP</style>
+			<fields>1</fields>
+		</object>
+	</object>
+</resource>
