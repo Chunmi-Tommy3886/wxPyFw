@@ -3,7 +3,6 @@
 
 __author__="Giuseppe Tripoli"
 __date__ ="$14-mar-2012 20.50.06$"
-__all__ = ["obj_log"]
 
 import time
 import os.path
@@ -11,7 +10,7 @@ import os.path
 def joinlist(string, list):
     return str(string).join(list)
 
-class obj_log :
+class o_log :
     def __init__(self, log_file):
         self.logfile = log_file
         

@@ -26,19 +26,7 @@
 				<label>tool</label>
 				<tooltip></tooltip>
 				<longhelp></longhelp>
-				<bitmap />
-			</object>
-			<object class="tool" name="m_tool2">
-				<label>tool</label>
-				<tooltip></tooltip>
-				<longhelp></longhelp>
-				<bitmap />
-			</object>
-			<object class="tool" name="m_tool3">
-				<label>tool</label>
-				<tooltip></tooltip>
-				<longhelp></longhelp>
-				<bitmap />
+				<bitmap>C:\Users\Giuseppe Tripoli\Devel\Python\wxPyFw\images\ok.png</bitmap>
 			</object>
 		</object>
 		<object class="wxSplitterWindow" name="main_panel">
@@ -53,45 +41,87 @@
 					<orient>wxVERTICAL</orient>
 					<object class="sizeritem">
 						<option>1</option>
-						<flag>wxALL|wxEXPAND</flag>
+						<flag>wxEXPAND</flag>
 						<border>5</border>
-						<object class="wxTreeCtrl" name="m_treeCtrl2">
+						<object class="wxTreeCtrl" name="treectrl">
 							<style>wxTR_DEFAULT_STYLE</style>
 						</object>
 					</object>
 					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALL</flag>
+						<option>1</option>
+						<flag>wxEXPAND | wxALL</flag>
 						<border>5</border>
-						<object class="wxListCtrl" name="m_listCtrl1">
-							<style>wxLC_ICON</style>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxListBox" name="m_listBox1">
-							<content>
-								<item>u</item>
-								<item>g</item>
-							</content>
+						<object class="wxGenericDirCtrl" name="dirctrl">
+							<defaultfolder>.</defaultfolder>
+							<filter></filter>
+							<defaultfilter>0</defaultfilter>
+							<style>wxDIRCTRL_3D_INTERNAL|wxDIRCTRL_SELECT_FIRST|wxDIRCTRL_SHOW_FILTERS|wxSUNKEN_BORDER</style>
 						</object>
 					</object>
 				</object>
 			</object>
-			<object class="wxPanel" name="m_panel4">
+			<object class="wxPanel" name="m_panel5">
 				<style>wxTAB_TRAVERSAL</style>
 				<object class="wxBoxSizer">
 					<orient>wxVERTICAL</orient>
 					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxEXPAND | wxALL</flag>
+						<border>0</border>
+						<object class="wxNotebook" name="m_notebook6">
+							<style>wxNB_MULTILINE</style>
+							<object class="notebookpage">
+								<label>a page</label>
+								<selected>0</selected>
+								<object class="wxPanel" name="m_panel17">
+									<style>wxTAB_TRAVERSAL</style>
+									<object class="wxBoxSizer">
+										<orient>wxVERTICAL</orient>
+										<object class="sizeritem">
+											<option>0</option>
+											<flag>wxEXPAND</flag>
+											<border>5</border>
+											<object class="wxToolBar" name="m_toolBar13">
+												<style>wxTB_HORIZONTAL</style>
+												<bitmapsize></bitmapsize>
+												<margins></margins>
+												<packing>1</packing>
+												<separation>5</separation>
+											</object>
+										</object>
+									</object>
+								</object>
+							</object>
+						</object>
+					</object>
+					<object class="sizeritem">
 						<option>1</option>
-						<flag>wxALL|wxEXPAND</flag>
-						<border>5</border>
-						<object class="wxTextCtrl" name="m_textCtrl1">
-							<style>wxTE_MULTILINE|wxTE_PROCESS_ENTER|wxTE_PROCESS_TAB|wxTE_WORDWRAP</style>
-							<value></value>
-							<maxlength>0</maxlength>
+						<flag>wxEXPAND | wxALL</flag>
+						<border>0</border>
+						<object class="wxNotebook" name="m_notebook61">
+							<style>wxNB_BOTTOM</style>
+							<object class="notebookpage">
+								<label>a page</label>
+								<selected>0</selected>
+								<object class="wxPanel" name="m_panel171">
+									<style>wxTAB_TRAVERSAL</style>
+									<object class="wxBoxSizer">
+										<orient>wxVERTICAL</orient>
+										<object class="sizeritem">
+											<option>0</option>
+											<flag>wxEXPAND</flag>
+											<border>5</border>
+											<object class="wxToolBar" name="m_toolBar131">
+												<style>wxTB_HORIZONTAL</style>
+												<bitmapsize></bitmapsize>
+												<margins></margins>
+												<packing>1</packing>
+												<separation>5</separation>
+											</object>
+										</object>
+									</object>
+								</object>
+							</object>
 						</object>
 					</object>
 				</object>
@@ -100,6 +130,58 @@
 		<object class="wxStatusBar" name="m_statusBar1">
 			<style>wxST_SIZEGRIP</style>
 			<fields>1</fields>
+		</object>
+	</object>
+	<object class="wxDialog" name="new_fialog">
+		<style>wxDEFAULT_DIALOG_STYLE</style>
+		<size>523,423</size>
+		<title></title>
+		<centered>1</centered>
+		<object class="wxBoxSizer">
+			<orient>wxHORIZONTAL</orient>
+			<object class="sizeritem">
+				<option>1</option>
+				<flag>wxALL|wxEXPAND</flag>
+				<border>5</border>
+				<object class="wxListCtrl" name="m_listCtrl2">
+					<style>wxLC_ICON</style>
+				</object>
+			</object>
+			<object class="sizeritem">
+				<option>0</option>
+				<flag>wxEXPAND</flag>
+				<border>5</border>
+				<object class="wxBoxSizer">
+					<orient>wxVERTICAL</orient>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="m_button1">
+							<label>MyButton</label>
+							<default>0</default>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="m_button2">
+							<label>MyButton</label>
+							<default>0</default>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxButton" name="m_button3">
+							<label>MyButton</label>
+							<default>0</default>
+						</object>
+					</object>
+				</object>
+			</object>
 		</object>
 	</object>
 </resource>

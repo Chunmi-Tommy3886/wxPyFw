@@ -4,5 +4,28 @@
 __author__="Giuseppe Tripoli"
 __date__ ="$14-mar-2012 20.30.02$"
 
-if __name__ == "__main__":
-    print "Hello World"
+import os
+    
+class model_wxpyfw:
+    def __init__(self):
+        pass
+    
+    def list_dir_file(self):
+        dirfile = {}
+        for dirname, dirnames, filenames in os.walk('.'):
+            
+            if dirname not in dirfile :
+                dirfile[dirname] = {}
+                
+            for subdirname in dirnames:
+                if subdirname not  in dirfile[dirname] :
+                    dirfile[dirname][subdirname] = list()
+                
+                #print os.path.join(dirname, subdirname)
+            #for filename in filenames:
+            #    if filename not in dirfile[dirname] :
+            #        dirfile[dirname].append(filename)
+                #print os.path.join(dirname, filename)
+        
+        return dirfile
+        

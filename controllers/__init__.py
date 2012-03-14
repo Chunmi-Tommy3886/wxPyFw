@@ -8,11 +8,13 @@ import sys
 import wx.xrc
 import traceback
 
-from globals.obj_log import obj_log
+from wxPyFw import controller_wxpyfw
 
-logger = obj_log("wxPyFw.log")
+from globals import *
 
-class window(wx.App):
+logger = _LOGGER_
+
+class window(wx.App, controller_wxpyfw):
     def OnInit(self):
         self.res = wx.xrc.XmlResource('gui\wxPyFw.xrc')
         self.init_frame()
@@ -29,6 +31,8 @@ class window(wx.App):
 
             #self.init_menubar()
             
+            controller_wxpyfw.__init__(self)
+            
             self.frame.Layout()
             self.frame.Show()
         except :
@@ -38,4 +42,5 @@ class window(wx.App):
         self.menuBar = self.res.LoadMenuBar("MenuBar")
         self.frame.Bind(wx.EVT_MENU, self.client_list, id=wx.xrc.XRCID("m_clientlist"))
         #self.frame.SetMenuBar(self.menuBar)
+    
         
