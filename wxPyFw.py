@@ -4,6 +4,16 @@
 __author__="Giuseppe Tripoli"
 __date__ ="$14-mar-2012 20.03.26$"
 
-if __name__ == 'main' :
-    
-    
+
+import wx
+import sys
+
+reload(sys)
+sys.setdefaultencoding("latin-1")
+del sys.setdefaultencoding
+
+from controllers import window
+
+if __name__ == '__main__':
+    app = window(False)
+    app.MainLoop()
