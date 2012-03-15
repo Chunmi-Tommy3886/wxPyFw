@@ -35,7 +35,7 @@
 			<gravity>0</gravity>
 			<minsize>0</minsize>
 			<orientation>vertical</orientation>
-			<object class="wxPanel" name="m_panel3">
+			<object class="wxPanel" name="panel_left">
 				<style>wxTAB_TRAVERSAL</style>
 				<object class="wxBoxSizer">
 					<orient>wxVERTICAL</orient>
@@ -43,24 +43,13 @@
 						<option>1</option>
 						<flag>wxEXPAND</flag>
 						<border>5</border>
-						<object class="wxTreeCtrl" name="treectrl">
-							<style>wxTR_DEFAULT_STYLE</style>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<option>1</option>
-						<flag>wxEXPAND | wxALL</flag>
-						<border>5</border>
-						<object class="wxGenericDirCtrl" name="dirctrl">
-							<defaultfolder>.</defaultfolder>
-							<filter></filter>
-							<defaultfilter>0</defaultfilter>
-							<style>wxDIRCTRL_3D_INTERNAL|wxDIRCTRL_SELECT_FIRST|wxDIRCTRL_SHOW_FILTERS|wxSUNKEN_BORDER</style>
+						<object class="wxTreeCtrl" name="project_tree">
+							<style>wxTR_HAS_BUTTONS|wxTR_HIDE_ROOT|wxTR_LINES_AT_ROOT|wxTR_MULTIPLE|wxSUNKEN_BORDER</style>
 						</object>
 					</object>
 				</object>
 			</object>
-			<object class="wxPanel" name="m_panel5">
+			<object class="wxPanel" name="panel_right">
 				<style>wxTAB_TRAVERSAL</style>
 				<object class="wxBoxSizer">
 					<orient>wxVERTICAL</orient>
@@ -69,7 +58,6 @@
 						<flag>wxEXPAND | wxALL</flag>
 						<border>0</border>
 						<object class="wxNotebook" name="widget_notebook">
-							<style>wxNB_MULTILINE</style>
 							<object class="notebookpage">
 								<label>a page</label>
 								<selected>0</selected>
@@ -88,9 +76,9 @@
 												<packing>1</packing>
 												<separation>5</separation>
 												<object class="tool" name="m_tool2">
-													<label>tool</label>
-													<tooltip></tooltip>
-													<longhelp></longhelp>
+													<label>tool 1</label>
+													<tooltip>tooltip 1</tooltip>
+													<longhelp>statusbar 1</longhelp>
 													<bitmap>C:\Users\Giuseppe Tripoli\Devel\Python\wxPyFw\images\wx_widget\button.xpm</bitmap>
 												</object>
 												<object class="separator" />
@@ -110,42 +98,8 @@
 					<object class="sizeritem">
 						<option>1</option>
 						<flag>wxEXPAND | wxALL</flag>
-						<border>0</border>
-						<object class="wxNotebook" name="m_notebook61">
-							<style>wxNB_BOTTOM</style>
-							<object class="notebookpage">
-								<label>a page</label>
-								<selected>0</selected>
-								<object class="wxPanel" name="m_panel171">
-									<style>wxTAB_TRAVERSAL</style>
-									<object class="wxBoxSizer">
-										<orient>wxVERTICAL</orient>
-										<object class="sizeritem">
-											<option>0</option>
-											<flag>wxEXPAND</flag>
-											<border>5</border>
-											<object class="wxToolBar" name="m_toolBar131">
-												<style>wxTB_HORIZONTAL</style>
-												<bitmapsize></bitmapsize>
-												<margins></margins>
-												<packing>1</packing>
-												<separation>5</separation>
-											</object>
-										</object>
-									</object>
-								</object>
-							</object>
-						</object>
-					</object>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALL</flag>
 						<border>5</border>
-						<object class="wxBitmapButton" name="m_bpButton1">
-							<style>wxBU_AUTODRAW</style>
-							<bitmap>C:\Users\Giuseppe Tripoli\Devel\Python\wxPyFw\images\ok.png</bitmap>
-							<default>0</default>
-						</object>
+						<object class="unknown" name="m_auinotebook2" />
 					</object>
 				</object>
 			</object>
