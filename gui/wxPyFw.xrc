@@ -70,6 +70,41 @@
 						<border>0</border>
 						<object class="wxNotebook" name="widget_notebook">
 							<style>wxNB_MULTILINE</style>
+							<object class="notebookpage">
+								<label>a page</label>
+								<selected>0</selected>
+								<object class="wxPanel" name="m_panel17">
+									<style>wxTAB_TRAVERSAL</style>
+									<object class="wxBoxSizer">
+										<orient>wxVERTICAL</orient>
+										<object class="sizeritem">
+											<option>0</option>
+											<flag>wxEXPAND</flag>
+											<border>5</border>
+											<object class="wxToolBar" name="m_toolBar13">
+												<style>wxTB_HORIZONTAL</style>
+												<bitmapsize></bitmapsize>
+												<margins></margins>
+												<packing>1</packing>
+												<separation>5</separation>
+												<object class="tool" name="m_tool2">
+													<label>tool</label>
+													<tooltip></tooltip>
+													<longhelp></longhelp>
+													<bitmap>C:\Users\Giuseppe Tripoli\Devel\Python\wxPyFw\images\wx_widget\button.xpm</bitmap>
+												</object>
+												<object class="separator" />
+												<object class="tool" name="m_tool3">
+													<label>tool</label>
+													<tooltip></tooltip>
+													<longhelp></longhelp>
+													<bitmap>C:\Users\Giuseppe Tripoli\Devel\Python\wxPyFw\images\wx_widget\bitmap_button.xpm</bitmap>
+												</object>
+											</object>
+										</object>
+									</object>
+								</object>
+							</object>
 						</object>
 					</object>
 					<object class="sizeritem">

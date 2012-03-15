@@ -9,9 +9,6 @@ import os
 from widget import *
 
 class model_wxpyfw:
-    def __init__(self):
-        pass
-    
     def widget(self):
         widget = widgets()
         widget.get_widget()
