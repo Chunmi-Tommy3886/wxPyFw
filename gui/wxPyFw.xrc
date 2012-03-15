@@ -95,12 +95,6 @@
 							</object>
 						</object>
 					</object>
-					<object class="sizeritem">
-						<option>1</option>
-						<flag>wxEXPAND | wxALL</flag>
-						<border>5</border>
-						<object class="unknown" name="m_auinotebook2" />
-					</object>
 				</object>
 			</object>
 		</object>
