@@ -22,11 +22,31 @@
 			<margins></margins>
 			<packing>1</packing>
 			<separation>5</separation>
-			<object class="tool" name="m_tool1">
+			<object class="tool" name="m_tool4">
+				<label>New Project</label>
+				<tooltip></tooltip>
+				<longhelp></longhelp>
+				<bitmap>C:\Users\Giuseppe Tripoli\Devel\Python\wxPyFw\images\24x24\new.png</bitmap>
+			</object>
+			<object class="separator" />
+			<object class="tool" name="m_tool5">
 				<label>tool</label>
 				<tooltip></tooltip>
 				<longhelp></longhelp>
-				<bitmap>C:\Users\Giuseppe Tripoli\Devel\Python\wxPyFw\images\ok.png</bitmap>
+				<bitmap>C:\Users\Giuseppe Tripoli\Devel\Python\wxPyFw\images\24x24\save.png</bitmap>
+			</object>
+			<object class="separator" />
+			<object class="tool" name="m_tool6">
+				<label>tool</label>
+				<tooltip></tooltip>
+				<longhelp></longhelp>
+				<bitmap>C:\Users\Giuseppe Tripoli\Devel\Python\wxPyFw\images\24x24\undo.png</bitmap>
+			</object>
+			<object class="tool" name="m_tool11">
+				<label>tool</label>
+				<tooltip></tooltip>
+				<longhelp></longhelp>
+				<bitmap>C:\Users\Giuseppe Tripoli\Devel\Python\wxPyFw\images\24x24\redo.png</bitmap>
 			</object>
 		</object>
 		<object class="wxSplitterWindow" name="main_panel">

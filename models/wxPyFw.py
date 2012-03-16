@@ -17,7 +17,7 @@ class model_wxpyfw:
         return widget.widgets
     
     def get_projects(self):
-        projects = o_cfg("projects.ini")
+        projects = o_cfg("publics/projects.ini")
         return projects.configfile
         
         

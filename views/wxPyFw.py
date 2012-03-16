@@ -1,21 +1,70 @@
 __author__="Giuseppe Tripoli"
 __date__ ="$14-mar-2012 20.30.02$"
 
-
 import os
 import wx
 import sys
 import wx.xrc
 import wx.aui
+import wx.lib.agw.aui
+import wx.stc
 import traceback
 
 from widget import *
 
 from globals import *
 
+from views.editor import code_editor
+
 logger = _LOGGER_
 
-class view_wxpyfw():
+class create_text_editor(code_editor):
+    def __init__(self, panel, file):
+        self.modified = False
+        self.panel = panel
+        self.file = file
+        self.notebook_files = self.panel.GetParent()
+        
+        code_editor.__init__(self, panel)
+        self.LoadFile(file)
+        self.EmptyUndoBuffer()
+        
+        self.Bind(wx.EVT_KEY_DOWN, self.SetModifiedFile)
+        
+        # line numbers in the margin
+        self.SetMarginType(1, wx.stc.STC_MARGIN_NUMBER)
+        self.SetMarginWidth(1, 25)
+        self.SetSTCFocus(True)
+        
+        self.notebook_files.Bind(wx.lib.agw.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.CloseFile)
+    
+    def CloseFile(self, event):
+        print self.file
+        if self.modified :
+            if(wx.MessageBox("File %s is modified. Save It?" % self.file, "Save...", wx.YES_NO | wx.YES_DEFAULT, self.panel)==wx.YES) :
+                wx.BeginBusyCursor()
+                
+                try :
+                    self.SaveFile(self.file)
+                except :
+                    logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))    
+                    
+                else :
+                
+                    self.notebook_files.DeletePage(self.notebook_files.GetSelection())
+                    event.Veto()
+
+                wx.EndBusyCursor()
+
+    
+    def SetModifiedFile(self, event):
+        if not self.modified :
+            self.modified = True
+            self.notebook_files.SetPageText(self.notebook_files.GetSelection(), "* %s" % self.notebook_files.GetPageText(self.notebook_files.GetSelection()))
+            #self.notebook_files.SetPageText(self.notebook_files.GetSelection(), "* %s" % self.notebook_files.GetPageText(self.notebook_files.GetSelection()))
+        
+        self.onKeyPressed(event)
+class view_wxpyfw:
     def __init__(self):
         
         self.files = {}
@@ -33,9 +82,7 @@ class view_wxpyfw():
         self.create_notebook_widget()
         
         self.create_notebook_files()
-        
-        print self.files
-        
+    
     def OpenFile(self, event):
         if self.treectrl.GetItemText(self.treectrl.GetItemParent(event.GetItem())) not in self.projects :
             files = self.files[self.treectrl.GetItemText(self.treectrl.GetItemParent(event.GetItem()))][self.treectrl.GetItemText(event.GetItem())]
@@ -44,9 +91,11 @@ class view_wxpyfw():
         
         panel = wx.Panel( self.notebook_files, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
         sizer = wx.BoxSizer( wx.VERTICAL )
-        input = wx.TextCtrl( panel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.TE_MULTILINE )
-        input.LoadFile(files)
-	sizer.Add( input, 1, wx.ALL|wx.EXPAND, 0 )
+        #input = wx.stc.StyledTextCtrl( panel, wx.ID_ANY)
+        #input.SetLexer(stc.STC_LEX_PYTHON)
+        #input.SetKeyWords(0, " ".join(keyword.kwlist))
+        
+	sizer.Add( create_text_editor(panel, files), 1, wx.ALL|wx.EXPAND, 0 )
         
         sizer.Layout()
         panel.SetSizer( sizer )
@@ -54,8 +103,7 @@ class view_wxpyfw():
         sizer.Fit( panel )
         
         self.notebook_files.AddPage( panel, self.treectrl.GetItemText(event.GetItem()), True, wx.NullBitmap )
-        
-    
+
     def create_treectrl(self):
         try :
             self.treectrl = wx.xrc.XRCCTRL(self.panel_left, "project_tree")
@@ -186,7 +234,7 @@ class view_wxpyfw():
 
     
     def create_notebook_files(self):
-        self.notebook_files = wx.aui.AuiNotebook( self.panel_right, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.aui.AUI_NB_BOTTOM|wx.aui.AUI_NB_CLOSE_ON_ALL_TABS|wx.aui.AUI_NB_DEFAULT_STYLE|wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|wx.aui.AUI_NB_WINDOWLIST_BUTTON )
+        self.notebook_files = wx.lib.agw.aui.AuiNotebook( self.panel_right, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.aui.AUI_NB_CLOSE_ON_ALL_TABS|wx.aui.AUI_NB_DEFAULT_STYLE|wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|wx.aui.AUI_NB_WINDOWLIST_BUTTON )
         self.panel_right.GetSizer().Add( self.notebook_files, 1, wx.EXPAND |wx.ALL, 0 )
         self.panel_right.Layout()
         self.panel_right.GetSizer().Fit( self.panel_right )
