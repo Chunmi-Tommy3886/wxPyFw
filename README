@@ -1,4 +1,4 @@
-This project was designed to obtain a Framework / IDE for wxPython to get a better
+#This project was designed to obtain a Framework / IDE for wxPython to get a better
 result of the Framework currently in circulation. The idea is to have all controllers
 wx defined dynamically so you can add new custom controllers.
 
@@ -8,7 +8,7 @@ a MVC in wxPython.
 Are welcome to any type of aid-help.
 
 REQUIRED:
-    - Python >= 2.6
+    - Python >= 2.6asd
     - wxPython >= 2.8.12.1 (unicode)
     - ConfigOBJ >= 4 http://www.voidspace.org.uk/python/configobj.html
 
