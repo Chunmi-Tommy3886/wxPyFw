@@ -18,53 +18,139 @@ from views.editor import code_editor
 
 logger = _LOGGER_
 
-class create_text_editor(code_editor):
+TABS = {}
+
+class create_text_editor :
     def __init__(self, panel, file):
-        self.modified = False
+        
         self.panel = panel
         self.file = file
         self.notebook_files = self.panel.GetParent()
         
-        code_editor.__init__(self, panel)
-        self.LoadFile(file)
-        self.EmptyUndoBuffer()
+        try :
+            self.text_editor = code_editor(panel)
+            self.text_editor.LoadFile(file)
+            self.text_editor.EmptyUndoBuffer()
+
+            self.text_editor.Bind(wx.EVT_KEY_DOWN, self.SetModifiedFile)
+
+            # line numbers in the margin
+            self.text_editor.SetMarginType(1, wx.stc.STC_MARGIN_NUMBER)
+            self.text_editor.SetMarginWidth(1, 25)
+            self.text_editor.SetSTCFocus(True)
+        except :
+            logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
+        else :
+            self.notebook_files.Bind(wx.lib.agw.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.CloseFile)
+            
+    def SetModifiedFile(self, event):
+        idx = self.notebook_files.GetSelection()
+        file = TABS[idx]
+
+        if not file["modified"] :
+#            file["modified"] = True
+            self.notebook_files.SetPageText(idx, "* %s" % file["file"])
+            #self.notebook_files.SetPageText(self.notebook_files.GetSelection(), "* %s" % self.notebook_files.GetPageText(self.notebook_files.GetSelection()))
         
-        self.Bind(wx.EVT_KEY_DOWN, self.SetModifiedFile)
-        
-        # line numbers in the margin
-        self.SetMarginType(1, wx.stc.STC_MARGIN_NUMBER)
-        self.SetMarginWidth(1, 25)
-        self.SetSTCFocus(True)
-        
-        self.notebook_files.Bind(wx.lib.agw.aui.EVT_AUINOTEBOOK_PAGE_CLOSE, self.CloseFile)
+        self.text_editor.onKeyPressed(event)
     
     def CloseFile(self, event):
-        print self.file
-        if self.modified :
-            if(wx.MessageBox("File %s is modified. Save It?" % self.file, "Save...", wx.YES_NO | wx.YES_DEFAULT, self.panel)==wx.YES) :
+        idx = self.notebook_files.GetSelection()
+        file = TABS[idx]
+        
+        if file["modified"] :
+            if(wx.MessageBox("File %s is modified. Save It?" % file["file"], "Save...", wx.YES_NO | wx.YES_DEFAULT, self.notebook_files)==wx.YES) :
                 wx.BeginBusyCursor()
                 
                 try :
-                    self.SaveFile(self.file)
+                    file["object"].text_editor.SaveFile(file["path"])
                 except :
                     logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))    
                     
                 else :
-                
-                    self.notebook_files.DeletePage(self.notebook_files.GetSelection())
+                    TABS.pop(idx)
+
+                    self.notebook_files.DeletePage(idx)
                     event.Veto()
 
                 wx.EndBusyCursor()
 
+class wxpyfw_actions :
+    def ToggleComment(self, event):
+        idx = self.notebook_files.GetSelection()
+        file = TABS[idx]
+        lines = []
+        if file["object"].text_editor.GetSelectionStart() == file["object"].text_editor.GetSelectionEnd() :
+            lines.append(file["object"].text_editor.GetCurrentLine())
+        else :
+            for pos in range(file["object"].text_editor.GetSelectionStart(), file["object"].text_editor.GetSelectionEnd()) :
+                if file["object"].text_editor.LineFromPosition(pos) not in lines :
+                    lines.append(file["object"].text_editor.LineFromPosition(pos))
+        for line in lines :
+            file["object"].text_editor.GotoLine(line)
+            
+            file["object"].text_editor.Home()
+            if file["object"].text_editor.GetCharAt(file["object"].text_editor.GetCurrentPos()) == 35 :
+                file["object"].text_editor.CharRight()
+                file["object"].text_editor.DeleteBack()
+            else :
+                file["object"].text_editor.AddText('#')
+        lines = []
     
-    def SetModifiedFile(self, event):
-        if not self.modified :
-            self.modified = True
-            self.notebook_files.SetPageText(self.notebook_files.GetSelection(), "* %s" % self.notebook_files.GetPageText(self.notebook_files.GetSelection()))
-            #self.notebook_files.SetPageText(self.notebook_files.GetSelection(), "* %s" % self.notebook_files.GetPageText(self.notebook_files.GetSelection()))
+    def DeleteLine(self, event):
+        idx = self.notebook_files.GetSelection()
+        file = TABS[idx]
+        file["object"].text_editor.LineDelete()
+
+    def DuplicateUp(self, event):
+        idx = self.notebook_files.GetSelection()
+        file = TABS[idx]
+        file["object"].text_editor.LineDuplicate()
+    
+    def DuplicateDw(self, event):
+        idx = self.notebook_files.GetSelection()
+        file = TABS[idx]
+        file["object"].text_editor.LineDuplicate()
+        file["object"].text_editor.LineDown()
         
-        self.onKeyPressed(event)
-class view_wxpyfw:
+        
+    def OnOpen(self, event):
+        filename = self.treectrl.GetItemText(event.GetItem())
+        
+        if self.treectrl.GetItemText(self.treectrl.GetItemParent(event.GetItem())) not in self.projects :
+            path = self.files[self.treectrl.GetItemText(self.treectrl.GetItemParent(event.GetItem()))][filename]
+        else :
+            path = self.files[filename]
+        
+        if path not in TABS :
+            panel = wx.Panel( self.notebook_files, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+            sizer = wx.BoxSizer( wx.VERTICAL )
+            
+            object = create_text_editor(panel, path)
+
+            sizer.Add( object.text_editor , 1, wx.ALL|wx.EXPAND, 0 )
+
+            sizer.Layout()
+            panel.SetSizer( sizer )
+            panel.Layout()
+            sizer.Fit( panel )
+
+            self.notebook_files.AddPage( panel, filename, True, wx.NullBitmap )
+
+            TABS[self.notebook_files.GetSelection()] = {
+                'path'  :   path,
+                'file'  :   filename,
+                'path'  :   path,
+                'panel' :   panel,
+                'sizer' :   sizer,
+                'object' :   object,
+                'modified':   False
+            }
+        else :
+            self.notebook_files.SetSelection(TABS[path]["idx"])
+    
+            
+class view_wxpyfw(wxpyfw_actions):
     def __init__(self):
         
         self.files = {}
@@ -77,37 +163,29 @@ class view_wxpyfw:
 
         self.panel_right = wx.xrc.XRCCTRL(self.panel, 'panel_right')
         
+        self.create_menubar()
+        
         self.create_treectrl()
         
         self.create_notebook_widget()
         
         self.create_notebook_files()
     
-    def OpenFile(self, event):
-        if self.treectrl.GetItemText(self.treectrl.GetItemParent(event.GetItem())) not in self.projects :
-            files = self.files[self.treectrl.GetItemText(self.treectrl.GetItemParent(event.GetItem()))][self.treectrl.GetItemText(event.GetItem())]
-        else :
-            files = self.files[self.treectrl.GetItemText(event.GetItem())]
+    def create_menubar(self):
+        #self.menuBar = self.res.LoadMenuBar("MenuBar")
+        self.menuBar = self.frame.GetMenuBar()
         
-        panel = wx.Panel( self.notebook_files, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-        sizer = wx.BoxSizer( wx.VERTICAL )
-        #input = wx.stc.StyledTextCtrl( panel, wx.ID_ANY)
-        #input.SetLexer(stc.STC_LEX_PYTHON)
-        #input.SetKeyWords(0, " ".join(keyword.kwlist))
+        self.frame.Bind(wx.EVT_MENU, self.ToggleComment, id=wx.xrc.XRCID("comment"))
+        self.frame.Bind(wx.EVT_MENU, self.DeleteLine, id=wx.xrc.XRCID("delete_line"))
+        self.frame.Bind(wx.EVT_MENU, self.DuplicateUp, id=wx.xrc.XRCID("duplicate_up"))
+        self.frame.Bind(wx.EVT_MENU, self.DuplicateDw, id=wx.xrc.XRCID("duplicate_dw"))
         
-	sizer.Add( create_text_editor(panel, files), 1, wx.ALL|wx.EXPAND, 0 )
-        
-        sizer.Layout()
-        panel.SetSizer( sizer )
-        panel.Layout()
-        sizer.Fit( panel )
-        
-        self.notebook_files.AddPage( panel, self.treectrl.GetItemText(event.GetItem()), True, wx.NullBitmap )
+         #self.frame.SetMenuBar(self.menuBar)
 
     def create_treectrl(self):
         try :
             self.treectrl = wx.xrc.XRCCTRL(self.panel_left, "project_tree")
-            self.treectrl.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OpenFile)
+            self.treectrl.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OnOpen)
         except :
             logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))    
         else :

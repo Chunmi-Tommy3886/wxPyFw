@@ -17,6 +17,8 @@ from globals.obj_cfg import o_cfg
 
 syntax = o_cfg("publics\syntax.ini")
 
+shortcuts = o_cfg("publics\shortcuts.ini")
+
 if wx.Platform == '__WXMSW__':
     # for windows OS
     faces = syntax.configfile["Windows"]

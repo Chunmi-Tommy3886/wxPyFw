@@ -6,49 +6,6 @@
 		<title></title>
 		<centered>1</centered>
 		<aui_managed>0</aui_managed>
-		<object class="wxMenuBar" name="m_menubar1">
-			<label>MyMenuBar</label>
-			<object class="wxMenu" name="file">
-				<label>File</label>
-				<object class="wxMenuItem" name="new_project">
-					<label>Nuovo Progetto</label>
-					<help></help>
-				</object>
-			</object>
-		</object>
-		<object class="wxToolBar" name="m_toolBar1">
-			<style>wxTB_HORIZONTAL</style>
-			<bitmapsize></bitmapsize>
-			<margins></margins>
-			<packing>1</packing>
-			<separation>5</separation>
-			<object class="tool" name="m_tool4">
-				<label>New Project</label>
-				<tooltip></tooltip>
-				<longhelp></longhelp>
-				<bitmap>C:\Users\Giuseppe Tripoli\Devel\Python\wxPyFw\images\24x24\new.png</bitmap>
-			</object>
-			<object class="separator" />
-			<object class="tool" name="m_tool5">
-				<label>tool</label>
-				<tooltip></tooltip>
-				<longhelp></longhelp>
-				<bitmap>C:\Users\Giuseppe Tripoli\Devel\Python\wxPyFw\images\24x24\save.png</bitmap>
-			</object>
-			<object class="separator" />
-			<object class="tool" name="m_tool6">
-				<label>tool</label>
-				<tooltip></tooltip>
-				<longhelp></longhelp>
-				<bitmap>C:\Users\Giuseppe Tripoli\Devel\Python\wxPyFw\images\24x24\undo.png</bitmap>
-			</object>
-			<object class="tool" name="m_tool11">
-				<label>tool</label>
-				<tooltip></tooltip>
-				<longhelp></longhelp>
-				<bitmap>C:\Users\Giuseppe Tripoli\Devel\Python\wxPyFw\images\24x24\redo.png</bitmap>
-			</object>
-		</object>
 		<object class="wxSplitterWindow" name="main_panel">
 			<style>wxSP_3D|wxSP_BORDER</style>
 			<sashpos>200</sashpos>
@@ -116,6 +73,94 @@
 						</object>
 					</object>
 				</object>
+			</object>
+		</object>
+		<object class="wxMenuBar" name="MenuBar">
+			<label>MenuBar</label>
+			<object class="wxMenu" name="file">
+				<label>File</label>
+				<object class="wxMenuItem" name="m_menuItem2">
+					<label>Nuovo File</label>
+					<help></help>
+				</object>
+				<object class="wxMenuItem" name="new_project">
+					<label>Nuovo Progetto</label>
+					<help></help>
+				</object>
+				<object class="separator" />
+				<object class="wxMenuItem" name="m_menuItem3">
+					<label>Salva\tCTRL+S</label>
+					<help></help>
+				</object>
+				<object class="wxMenuItem" name="m_menuItem4">
+					<label>Salva Tutto\tCTRL+ALT+S</label>
+					<help></help>
+				</object>
+			</object>
+			<object class="wxMenu" name="m_menu2">
+				<label>Source</label>
+				<object class="wxMenuItem" name="cut">
+					<label>Cut\tCTRL+X</label>
+					<help></help>
+				</object>
+				<object class="wxMenuItem" name="copy">
+					<label>Copy\tCTRL+C</label>
+					<help></help>
+				</object>
+				<object class="wxMenuItem" name="paste">
+					<label>Paste\tCTRL+V</label>
+					<help></help>
+				</object>
+				<object class="separator" />
+				<object class="wxMenuItem" name="comment">
+					<label>Toggle Comment\tCTRL+SHIFT+C</label>
+					<help></help>
+				</object>
+				<object class="wxMenuItem" name="delete_line">
+					<label>Delete Line\tCTRL+SHIFT+E</label>
+					<help></help>
+				</object>
+				<object class="wxMenuItem" name="duplicate_up">
+					<label>Duplicate Up\tCTRL+SHIFT+UP</label>
+					<help></help>
+				</object>
+				<object class="wxMenuItem" name="duplicate_dw">
+					<label>Duplicate Down\tCTRL+SHIFT+DOWN</label>
+					<help></help>
+				</object>
+			</object>
+		</object>
+		<object class="wxToolBar" name="m_toolBar1">
+			<style>wxTB_HORIZONTAL</style>
+			<bitmapsize></bitmapsize>
+			<margins></margins>
+			<packing>1</packing>
+			<separation>5</separation>
+			<object class="tool" name="m_tool4">
+				<label>New Project</label>
+				<tooltip></tooltip>
+				<longhelp></longhelp>
+				<bitmap>C:\Users\Giuseppe Tripoli\Devel\Python\wxPyFw\images\24x24\new.png</bitmap>
+			</object>
+			<object class="separator" />
+			<object class="tool" name="m_tool5">
+				<label>tool</label>
+				<tooltip></tooltip>
+				<longhelp></longhelp>
+				<bitmap>C:\Users\Giuseppe Tripoli\Devel\Python\wxPyFw\images\24x24\save.png</bitmap>
+			</object>
+			<object class="separator" />
+			<object class="tool" name="m_tool6">
+				<label>tool</label>
+				<tooltip></tooltip>
+				<longhelp></longhelp>
+				<bitmap>C:\Users\Giuseppe Tripoli\Devel\Python\wxPyFw\images\24x24\undo.png</bitmap>
+			</object>
+			<object class="tool" name="m_tool11">
+				<label>tool</label>
+				<tooltip></tooltip>
+				<longhelp></longhelp>
+				<bitmap>C:\Users\Giuseppe Tripoli\Devel\Python\wxPyFw\images\24x24\redo.png</bitmap>
 			</object>
 		</object>
 		<object class="wxStatusBar" name="m_statusBar1">

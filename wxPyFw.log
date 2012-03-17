@@ -1,0 +1,4 @@
+17/03/2012 13:44:16 [ERROR][(<class 'controllers.window'>, 'wxPyFw.py', 19)]: global name 'xrc' is not defined 
+17/03/2012 13:44:44 [ERROR][(<class 'controllers.window'>, 'wxPyFw.py', 19)]: global name 'xrc' is not defined 
+17/03/2012 13:47:05 [ERROR][(<class 'controllers.window'>, 'wxPyFw.py', 19)]: global name 'xrc' is not defined 
+17/03/2012 13:48:32 [ERROR][(<class 'controllers.window'>, 'wxPyFw.py', 19)]: global name 'xrc' is not defined 
