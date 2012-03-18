@@ -18,7 +18,7 @@ class model_options:
     
     def get_projects(self):
         projects = o_cfg("publics/projects.ini")
-        return projects.configfile
+        return projects
         
         
     def list_dir_file(self, path, show_hidden=False):

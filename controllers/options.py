@@ -9,8 +9,6 @@ from models.options import model_options
 
 from globals import *
 
-logger = _LOGGER_
-
 class controller_options(model_options, view_options):
     def __init__(self, window):
         self.window = window

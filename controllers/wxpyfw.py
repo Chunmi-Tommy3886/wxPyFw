@@ -9,8 +9,6 @@ from models.wxpyfw import model_wxpyfw
 
 from globals import *
 
-logger = _LOGGER_
-
 class controller_wxpyfw(model_wxpyfw, view_wxpyfw):
     def __init__(self, window):
         self.res = window.res

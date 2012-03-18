@@ -10,8 +10,6 @@ import traceback
 
 from globals import *
 
-logger = _LOGGER_
-
 class window(wx.App):
     def OnInit(self):
         self.res = wx.xrc.XmlResource('gui\wxPyFw.xrc')

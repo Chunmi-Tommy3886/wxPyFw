@@ -7,13 +7,14 @@ __date__ ="$3-nov-2011 22.03.35$"
 from configobj import ConfigObj
 from validate  import Validator
 
-class o_cfg :
+class o_cfg(ConfigObj):
     def __init__(self, config_file, config_spec=None):
-        self.configspec = None
+        spec = None
+        
         if config_spec is not None :
-            self.configspec = ConfigObj(config_spec, interpolation=False, list_values=True, _inspec=True)
+            spec = ConfigObj.__init__(self, config_spec, interpolation=False, list_values=True, _inspec=True)
             
-        self.configfile = ConfigObj(config_file, configspec=self.configspec)
+        ConfigObj.__init__(self, config_file, configspec=spec)
     
     def parse_cfg(self):
         vars = {}

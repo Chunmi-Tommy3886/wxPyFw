@@ -6,10 +6,9 @@ import os
 import sys
 import traceback
 
-from globals.obj_log import o_log
-from globals.obj_cfg  import o_cfg
+from globals import *
 
-logger = o_log("wxPyFw.log")
+from globals.obj_cfg  import o_cfg
 
 class widgets:
     def __init__(self):
@@ -20,7 +19,7 @@ class widgets:
             for fname in os.listdir("widget"):
                 if fname[-3:] in ["ini"] :
                     cfg = o_cfg("widget/%s" % fname)
-                    self.widgets[fname[:-4]] = cfg.configfile
+                    self.widgets[fname[:-4]] = cfg
                     
         except :
             logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))    

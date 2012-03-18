@@ -21,9 +21,9 @@ shortcuts = o_cfg("publics\shortcuts.ini")
 
 if wx.Platform == '__WXMSW__':
     # for windows OS
-    faces = syntax.configfile["Windows"]
+    faces = syntax["Windows"]
 else:
-    faces = syntax.configfile["Other"]
+    faces = syntax["Other"]
 
 faces["tabsize"] = int(faces["tabsize"])
 faces["little"] = int(faces["little"])
@@ -33,30 +33,30 @@ faces["large"] = int(faces["large"])
 def get_styles(word):
     result = dict()
     
-    result["back"] = syntax.configfile["Python"]["Default"]["back"]
-    result["size"] = faces[syntax.configfile["Python"]["Default"]["size"]]
-    result["font"] = faces[syntax.configfile["Python"]["Default"]["font"]]
-    result["color"] = syntax.configfile["Python"]["Default"]["color"]
-    result["weight"] = syntax.configfile["Python"]["Default"]["weight"]
+    result["back"] = syntax["Python"]["Default"]["back"]
+    result["size"] = faces[syntax["Python"]["Default"]["size"]]
+    result["font"] = faces[syntax["Python"]["Default"]["font"]]
+    result["color"] = syntax["Python"]["Default"]["color"]
+    result["weight"] = syntax["Python"]["Default"]["weight"]
     
-    if word in syntax.configfile["Python"] :
-        if 'back' in syntax.configfile["Python"][word] :
-            result["back"] = syntax.configfile["Python"][word]["back"]
+    if word in syntax["Python"] :
+        if 'back' in syntax["Python"][word] :
+            result["back"] = syntax["Python"][word]["back"]
         
-        if 'size' in syntax.configfile["Python"][word] :
-            result["size"] = faces[syntax.configfile["Python"][word]["size"]]
+        if 'size' in syntax["Python"][word] :
+            result["size"] = faces[syntax["Python"][word]["size"]]
             
-        if 'font' in syntax.configfile["Python"][word] :
-            result["font"] = faces[syntax.configfile["Python"][word]["font"]]
+        if 'font' in syntax["Python"][word] :
+            result["font"] = faces[syntax["Python"][word]["font"]]
             
-        if 'color' in syntax.configfile["Python"][word] :
-            result["color"] = syntax.configfile["Python"][word]["color"]
+        if 'color' in syntax["Python"][word] :
+            result["color"] = syntax["Python"][word]["color"]
             
-        if 'weight' in syntax.configfile["Python"][word] :
-            if type(syntax.configfile["Python"][word]["weight"]) == str :
-                result["weight"] = syntax.configfile["Python"][word]["weight"]
+        if 'weight' in syntax["Python"][word] :
+            if type(syntax["Python"][word]["weight"]) == str :
+                result["weight"] = syntax["Python"][word]["weight"]
             else :
-                result["weight"] = ",".join(syntax.configfile["Python"][word]["weight"])
+                result["weight"] = ",".join(syntax["Python"][word]["weight"])
     
     return result
 

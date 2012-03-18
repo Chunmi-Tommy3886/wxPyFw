@@ -16,8 +16,6 @@ from globals import *
 
 from views.editor import code_editor
 
-logger = _LOGGER_
-
 class view_newfile:
     def __init__(self):
         try :

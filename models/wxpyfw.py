@@ -16,18 +16,26 @@ from globals import *
 
 from globals.obj_cfg import o_cfg
 
-
-logger = _LOGGER_
-
-
 class model_wxpyfw:    
-    
     def CopyFile(self, event):
         print "copy"
     def CutFile(self, event):
         print "cut"
     def PasteFile(self, event):
         print "paste"
+    
+    def CreateProject(self, name, path, open, main):
+        projects = o_cfg("publics\projects.ini")
+        
+        config = projects
+        
+        config[name] = {}
+        config[name]['main'] = main
+        config[name]['lang'] = "python"
+        config[name]['hidden'] = "False"
+        config[name]['path'] = path
+        
+        config.write()
         
     def TreeDelete(self, event):
         select = self.treectrl.GetItemPyData(self.treectrl.GetSelections()[0])
@@ -57,7 +65,7 @@ class model_wxpyfw:
     
     def get_projects(self):
         projects = o_cfg("publics/projects.ini")
-        return projects.configfile
+        return projects
     
     def list_file_dir(self, path, hidden=False) :
         result = list()

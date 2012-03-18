@@ -143,7 +143,7 @@
 			<margins></margins>
 			<packing>1</packing>
 			<separation>5</separation>
-			<object class="tool" name="m_tool4">
+			<object class="tool" name="new_project">
 				<label>New Project</label>
 				<tooltip></tooltip>
 				<longhelp></longhelp>
@@ -175,62 +175,115 @@
 			<fields>1</fields>
 		</object>
 	</object>
-	<object class="wxDialog" name="new_fialog">
-		<style>wxDEFAULT_DIALOG_STYLE</style>
-		<size>523,423</size>
-		<title></title>
+	<object class="wxWizard" name="new_project">
+		<style>wxDEFAULT_DIALOG_STYLE|wxSYSTEM_MENU</style>
+		<size>285,270</size>
+		<title>New Project</title>
 		<centered>1</centered>
-		<object class="wxBoxSizer">
-			<orient>wxHORIZONTAL</orient>
-			<object class="sizeritem">
-				<option>1</option>
-				<flag>wxALL|wxEXPAND</flag>
-				<border>5</border>
-				<object class="wxListCtrl" name="m_listCtrl2">
-					<style>wxLC_ICON</style>
+		<bitmap>C:\Users\Giuseppe Tripoli\Devel\Python\wxPyFw\images\16x16\new_project.png</bitmap>
+		<object class="wxWizardPageSimple" name="FirstPage">
+			<object class="wxBoxSizer">
+				<orient>wxVERTICAL</orient>
+				<object class="sizeritem">
+					<option>1</option>
+					<flag>wxEXPAND|wxTOP|wxRIGHT|wxLEFT</flag>
+					<border>5</border>
+					<object class="wxListCtrl" name="listctrl">
+						<style>wxLC_ICON</style>
+					</object>
 				</object>
 			</object>
-			<object class="sizeritem">
-				<option>0</option>
-				<flag>wxEXPAND</flag>
-				<border>5</border>
-				<object class="wxBoxSizer">
-					<orient>wxVERTICAL</orient>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxButton" name="m_button1">
-							<label>MyButton</label>
-							<default>0</default>
+		</object>
+		<object class="wxWizardPageSimple" name="SecondPage">
+			<object class="wxBoxSizer">
+				<orient>wxVERTICAL</orient>
+				<object class="sizeritem">
+					<option>0</option>
+					<flag>wxEXPAND</flag>
+					<border>5</border>
+					<object class="wxBoxSizer">
+						<orient>wxVERTICAL</orient>
+						<object class="sizeritem">
+							<option>0</option>
+							<flag>wxALL</flag>
+							<border>5</border>
+							<object class="wxStaticText">
+								<label>Project Name</label>
+								<wrap>-1</wrap>
+							</object>
+						</object>
+						<object class="sizeritem">
+							<option>0</option>
+							<flag>wxBOTTOM|wxEXPAND|wxLEFT|wxRIGHT</flag>
+							<border>5</border>
+							<object class="wxTextCtrl" name="project_name">
+								<value></value>
+								<maxlength>0</maxlength>
+							</object>
 						</object>
 					</object>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxButton" name="m_button2">
-							<label>MyButton</label>
-							<default>0</default>
+				</object>
+				<object class="sizeritem">
+					<option>0</option>
+					<flag>wxEXPAND</flag>
+					<border>5</border>
+					<object class="wxBoxSizer">
+						<orient>wxVERTICAL</orient>
+						<object class="sizeritem">
+							<option>0</option>
+							<flag>wxALL</flag>
+							<border>5</border>
+							<object class="wxStaticText" name="m_staticText5">
+								<label>Select a Folder</label>
+								<wrap>-1</wrap>
+							</object>
+						</object>
+						<object class="sizeritem">
+							<option>0</option>
+							<flag>wxBOTTOM|wxEXPAND|wxLEFT|wxRIGHT</flag>
+							<border>5</border>
+							<object class="wxDirPickerCtrl" name="path">
+								<value></value>
+								<message>Select a folder</message>
+								<style>wxDIRP_DEFAULT_STYLE</style>
+							</object>
 						</object>
 					</object>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALL</flag>
-						<border>5</border>
-						<object class="wxButton" name="m_button3">
-							<label>MyButton</label>
-							<default>0</default>
-						</object>
+				</object>
+				<object class="sizeritem">
+					<option>0</option>
+					<flag>wxALL</flag>
+					<border>5</border>
+					<object class="wxCheckBox" name="opener">
+						<label>Open Project</label>
+						<checked>1</checked>
+					</object>
+				</object>
+				<object class="sizeritem">
+					<option>0</option>
+					<flag>wxALL</flag>
+					<border>5</border>
+					<object class="wxCheckBox" name="set_main">
+						<label>Set Main Project</label>
+						<checked>1</checked>
+					</object>
+				</object>
+				<object class="sizeritem">
+					<option>0</option>
+					<flag>wxALL</flag>
+					<border>5</border>
+					<object class="wxCheckBox" name="create_dir">
+						<label>Create Directory</label>
+						<checked>1</checked>
 					</object>
 				</object>
 			</object>
 		</object>
 	</object>
-	<object class="wxDialog" name="newfile">
+	<object class="wxDialog" name="_newproject">
 		<style>wxDEFAULT_DIALOG_STYLE</style>
-		<size>399,121</size>
-		<title>Create New File</title>
+		<size>403,227</size>
+		<title></title>
 		<centered>1</centered>
 		<object class="wxBoxSizer">
 			<orient>wxVERTICAL</orient>
@@ -238,103 +291,19 @@
 				<option>0</option>
 				<flag>wxEXPAND</flag>
 				<border>5</border>
-				<object class="wxBoxSizer">
-					<orient>wxHORIZONTAL</orient>
-					<object class="sizeritem">
-						<option>0</option>
-						<flag>wxALL</flag>
+				<object class="wxStdDialogButtonSizer">
+					<object class="button">
+						<flag>wxALIGN_CENTER_HORIZONTAL|wxALL</flag>
 						<border>5</border>
-						<object class="wxStaticText" name="filename1">
-							<label>File Name</label>
-							<wrap>-1</wrap>
+						<object class="wxButton" name="wxID_OK">
+							<label>&amp;OK</label>
 						</object>
 					</object>
-					<object class="sizeritem">
-						<option>1</option>
-						<flag>wxALL|wxEXPAND</flag>
-						<border>3</border>
-						<object class="wxFilePickerCtrl" name="path">
-							<value></value>
-							<message>Save file...</message>
-							<wildcard>Python Module Files (*.py)|*.py|Configuration INI Files (*.ini)|*.ini</wildcard>
-							<style>wxFLP_SAVE|wxFLP_USE_TEXTCTRL</style>
-						</object>
-					</object>
-				</object>
-			</object>
-			<object class="spacer">
-				<option>1</option>
-				<flag>wxEXPAND</flag>
-				<border>5</border>
-				<size>0,0</size>
-			</object>
-			<object class="sizeritem">
-				<option>0</option>
-				<flag>wxEXPAND | wxALL</flag>
-				<border>5</border>
-				<object class="wxStaticLine" name="m_staticline1">
-					<style>wxLI_HORIZONTAL</style>
-				</object>
-			</object>
-			<object class="sizeritem">
-				<option>0</option>
-				<flag>wxEXPAND</flag>
-				<border>5</border>
-				<object class="wxBoxSizer">
-					<orient>wxHORIZONTAL</orient>
-					<object class="sizeritem">
-						<option>1</option>
-						<flag>wxEXPAND</flag>
+					<object class="button">
+						<flag>wxALIGN_CENTER_HORIZONTAL|wxALL</flag>
 						<border>5</border>
-						<object class="wxGridSizer">
-							<rows>0</rows>
-							<cols>2</cols>
-							<vgap>0</vgap>
-							<hgap>0</hgap>
-							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALIGN_LEFT|wxALL</flag>
-								<border>5</border>
-								<object class="wxBoxSizer">
-									<orient>wxHORIZONTAL</orient>
-									<object class="sizeritem">
-										<option>0</option>
-										<flag>wxALL</flag>
-										<border>5</border>
-										<object class="wxButton" name="m_button51">
-											<hidden>1</hidden>
-											<label>MyButton</label>
-											<default>0</default>
-										</object>
-									</object>
-									<object class="sizeritem">
-										<option>0</option>
-										<flag>wxALL</flag>
-										<border>5</border>
-										<object class="wxButton" name="cancel">
-											<label>Cancel</label>
-											<default>0</default>
-										</object>
-									</object>
-								</object>
-							</object>
-							<object class="sizeritem">
-								<option>0</option>
-								<flag>wxALIGN_RIGHT|wxALL</flag>
-								<border>5</border>
-								<object class="wxBoxSizer">
-									<orient>wxHORIZONTAL</orient>
-									<object class="sizeritem">
-										<option>0</option>
-										<flag>wxALL</flag>
-										<border>5</border>
-										<object class="wxButton" name="create">
-											<label>Create</label>
-											<default>1</default>
-										</object>
-									</object>
-								</object>
-							</object>
+						<object class="wxButton" name="wxID_CANCEL">
+							<label>&amp;Cancel</label>
 						</object>
 					</object>
 				</object>
@@ -454,9 +423,18 @@
 	</object>
 	<object class="wxMenu" name="menu_tree">
 		<label>Menu</label>
-		<object class="wxMenuItem" name="tree_new">
-			<label>New File</label>
-			<help></help>
+		<object class="wxMenu" name="tree_new">
+			<label>Insert</label>
+			<object class="wxMenuItem" name="new_file">
+				<label>File</label>
+				<help></help>
+				<bitmap>C:\Users\Giuseppe Tripoli\Devel\Python\wxPyFw\images\16x16\file.png</bitmap>
+			</object>
+			<object class="wxMenuItem" name="new_folder">
+				<label>Folder</label>
+				<help></help>
+				<bitmap>C:\Users\Giuseppe Tripoli\Devel\Python\wxPyFw\images\16x16\folder.png</bitmap>
+			</object>
 		</object>
 		<object class="wxMenuItem" name="tree_open">
 			<label>Open</label>
@@ -487,6 +465,15 @@
 		<object class="separator" />
 		<object class="wxMenuItem" name="tree_find">
 			<label>Find</label>
+			<help></help>
+		</object>
+		<object class="separator" />
+		<object class="wxMenuItem" name="set_main">
+			<label>Set as Main Project</label>
+			<help></help>
+		</object>
+		<object class="wxMenuItem" name="unset_main">
+			<label>Unset as Main Project</label>
 			<help></help>
 		</object>
 	</object>
