@@ -88,11 +88,11 @@
 					<help></help>
 				</object>
 				<object class="separator" />
-				<object class="wxMenuItem" name="m_menuItem3">
+				<object class="wxMenuItem" name="save">
 					<label>Salva\tCTRL+S</label>
 					<help></help>
 				</object>
-				<object class="wxMenuItem" name="m_menuItem4">
+				<object class="wxMenuItem" name="save_all">
 					<label>Salva Tutto\tCTRL+ALT+S</label>
 					<help></help>
 				</object>
@@ -111,13 +111,13 @@
 					<label>Paste\tCTRL+V</label>
 					<help></help>
 				</object>
+				<object class="wxMenuItem" name="delete">
+					<label>Delete\tCTRL+D</label>
+					<help></help>
+				</object>
 				<object class="separator" />
 				<object class="wxMenuItem" name="comment">
 					<label>Toggle Comment\tCTRL+SHIFT+C</label>
-					<help></help>
-				</object>
-				<object class="wxMenuItem" name="delete_line">
-					<label>Delete Line\tCTRL+SHIFT+E</label>
 					<help></help>
 				</object>
 				<object class="wxMenuItem" name="duplicate_up">
@@ -221,6 +221,120 @@
 						<object class="wxButton" name="m_button3">
 							<label>MyButton</label>
 							<default>0</default>
+						</object>
+					</object>
+				</object>
+			</object>
+		</object>
+	</object>
+	<object class="wxDialog" name="newfile">
+		<style>wxDEFAULT_DIALOG_STYLE</style>
+		<size>399,121</size>
+		<title>Create New File</title>
+		<centered>1</centered>
+		<object class="wxBoxSizer">
+			<orient>wxVERTICAL</orient>
+			<object class="sizeritem">
+				<option>0</option>
+				<flag>wxEXPAND</flag>
+				<border>5</border>
+				<object class="wxBoxSizer">
+					<orient>wxHORIZONTAL</orient>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxALL</flag>
+						<border>5</border>
+						<object class="wxStaticText" name="filename1">
+							<label>File Name</label>
+							<wrap>-1</wrap>
+						</object>
+					</object>
+					<object class="sizeritem">
+						<option>1</option>
+						<flag>wxALL|wxEXPAND</flag>
+						<border>3</border>
+						<object class="wxFilePickerCtrl" name="path">
+							<value></value>
+							<message>Save file...</message>
+							<wildcard>Python Module Files (*.py)|*.py|Configuration INI Files (*.ini)|*.ini</wildcard>
+							<style>wxFLP_SAVE|wxFLP_USE_TEXTCTRL</style>
+						</object>
+					</object>
+				</object>
+			</object>
+			<object class="spacer">
+				<option>1</option>
+				<flag>wxEXPAND</flag>
+				<border>5</border>
+				<size>0,0</size>
+			</object>
+			<object class="sizeritem">
+				<option>0</option>
+				<flag>wxEXPAND | wxALL</flag>
+				<border>5</border>
+				<object class="wxStaticLine" name="m_staticline1">
+					<style>wxLI_HORIZONTAL</style>
+				</object>
+			</object>
+			<object class="sizeritem">
+				<option>0</option>
+				<flag>wxEXPAND</flag>
+				<border>5</border>
+				<object class="wxBoxSizer">
+					<orient>wxHORIZONTAL</orient>
+					<object class="sizeritem">
+						<option>1</option>
+						<flag>wxEXPAND</flag>
+						<border>5</border>
+						<object class="wxGridSizer">
+							<rows>0</rows>
+							<cols>2</cols>
+							<vgap>0</vgap>
+							<hgap>0</hgap>
+							<object class="sizeritem">
+								<option>0</option>
+								<flag>wxALIGN_LEFT|wxALL</flag>
+								<border>5</border>
+								<object class="wxBoxSizer">
+									<orient>wxHORIZONTAL</orient>
+									<object class="sizeritem">
+										<option>0</option>
+										<flag>wxALL</flag>
+										<border>5</border>
+										<object class="wxButton" name="m_button51">
+											<hidden>1</hidden>
+											<label>MyButton</label>
+											<default>0</default>
+										</object>
+									</object>
+									<object class="sizeritem">
+										<option>0</option>
+										<flag>wxALL</flag>
+										<border>5</border>
+										<object class="wxButton" name="cancel">
+											<label>Cancel</label>
+											<default>0</default>
+										</object>
+									</object>
+								</object>
+							</object>
+							<object class="sizeritem">
+								<option>0</option>
+								<flag>wxALIGN_RIGHT|wxALL</flag>
+								<border>5</border>
+								<object class="wxBoxSizer">
+									<orient>wxHORIZONTAL</orient>
+									<object class="sizeritem">
+										<option>0</option>
+										<flag>wxALL</flag>
+										<border>5</border>
+										<object class="wxButton" name="create">
+											<label>Create</label>
+											<default>1</default>
+										</object>
+									</object>
+								</object>
+							</object>
 						</object>
 					</object>
 				</object>
@@ -336,6 +450,44 @@
 					</object>
 				</object>
 			</object>
+		</object>
+	</object>
+	<object class="wxMenu" name="menu_tree">
+		<label>Menu</label>
+		<object class="wxMenuItem" name="tree_new">
+			<label>New File</label>
+			<help></help>
+		</object>
+		<object class="wxMenuItem" name="tree_open">
+			<label>Open</label>
+			<help></help>
+		</object>
+		<object class="separator" />
+		<object class="wxMenuItem" name="tree_cut">
+			<label>Cut</label>
+			<help></help>
+		</object>
+		<object class="wxMenuItem" name="tree_copy">
+			<label>Copy</label>
+			<help></help>
+		</object>
+		<object class="wxMenuItem" name="tree_paste">
+			<label>Paste</label>
+			<help></help>
+		</object>
+		<object class="separator" />
+		<object class="wxMenuItem" name="tree_rename">
+			<label>Rename\tF2</label>
+			<help></help>
+		</object>
+		<object class="wxMenuItem" name="tree_delete">
+			<label>Delete\tCANC</label>
+			<help></help>
+		</object>
+		<object class="separator" />
+		<object class="wxMenuItem" name="tree_find">
+			<label>Find</label>
+			<help></help>
 		</object>
 	</object>
 </resource>

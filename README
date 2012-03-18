@@ -8,9 +8,10 @@ a MVC in wxPython.
 Are welcome to any type of aid-help.
 
 REQUIRED:
-    - Python >= 2.6asd
+    - Python >= 2.6
     - wxPython >= 2.8.12.1 (unicode)
     - ConfigOBJ >= 4 http://www.voidspace.org.uk/python/configobj.html
 
 NOTE:
     - Exclude from commit ./wxPyFw.log
+

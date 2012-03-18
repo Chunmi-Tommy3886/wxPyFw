@@ -4,21 +4,23 @@ __date__ ="$14-mar-2012 20.30.02$"
 import sys
 import traceback
 
-from views.wxpyfw import view_wxpyfw
-from models.wxpyfw import model_wxpyfw
+from views.newfile import view_newfile
+from models.newfile import model_newfile
 
 from globals import *
 
 logger = _LOGGER_
 
-class controller_wxpyfw(model_wxpyfw, view_wxpyfw):
+class controller_newfile(model_newfile, view_newfile):
     def __init__(self, window):
-        self.res = window.res
         self.window = window
+        self.res = window.res
         self.frame = window.frame
         self.panel = window.panel
         
+        self.infofile = None
+        
         try :
-            view_wxpyfw.__init__(self)
+            view_newfile.__init__(self)
         except :
             logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))

@@ -49,9 +49,10 @@ class create_text_editor :
         file = TAB[idx]
 
         if not file["modified"] :
-            file["modified"] = True
-            self.notebook_files.SetPageText(idx, "* %s" % file["name"])
-            #self.notebook_files.SetPageText(self.notebook_files.GetSelection(), "* %s" % self.notebook_files.GetPageText(self.notebook_files.GetSelection()))
+            file["modified"] = file["object"].text_editor.GetModify()
+            if file["object"].text_editor.GetModify() :
+                self.notebook_files.SetPageText(idx, "* %s" % file["name"])
+                #self.notebook_files.SetPageText(self.notebook_files.GetSelection(), "* %s" % self.notebook_files.GetPageText(self.notebook_files.GetSelection()))
         
         self.text_editor.onKeyPressed(event)
     
@@ -60,7 +61,7 @@ class create_text_editor :
         file = TAB[idx]
         
         if file["object"].text_editor.GetModify() :
-            if(wx.MessageBox("File %s is modified. Save It?" % file["name"], "Save...", wx.YES_NO | wx.YES_DEFAULT, self.notebook_files)==wx.YES) :
+            if(wx.MessageBox("File %s is modified. Save It?" % file["name"], "Save...", wx.YES_NO | wx.CANCEL | wx.YES_DEFAULT, self.notebook_files)==wx.YES) :
                 wx.BeginBusyCursor()
                 
                 try :
@@ -81,7 +82,7 @@ class create_text_editor :
                     event.Veto()
 
                 wx.EndBusyCursor()
-
+    
 class wxpyfw_actions :
     def LoadOptions(self, event):
         self.window.LoadController('options')
@@ -111,7 +112,30 @@ class wxpyfw_actions :
         idx = self.notebook_files.GetSelection()
         file = TAB[idx]
         file["object"].text_editor.LineDelete()
+        
+    def CutLine(self, event):
+        idx = self.notebook_files.GetSelection()
+        file = TAB[idx]
+        
+        if file["object"].text_editor.GetSelectionStart() == file["object"].text_editor.GetSelectionEnd() :
+            file["object"].text_editor.LineCut()
+        else :
+            file["object"].text_editor.Cut()
 
+    def CopyLine(self, event):
+        idx = self.notebook_files.GetSelection()
+        file = TAB[idx]
+        
+        if file["object"].text_editor.GetSelectionStart() == file["object"].text_editor.GetSelectionEnd() :
+            file["object"].text_editor.LineCopy()
+        else :
+            file["object"].text_editor.Copy()
+    
+    def PasteLine(self, event):
+        idx = self.notebook_files.GetSelection()
+        file = TAB[idx]
+        file["object"].text_editor.Paste()
+            
     def DuplicateUp(self, event):
         idx = self.notebook_files.GetSelection()
         file = TAB[idx]
@@ -123,14 +147,14 @@ class wxpyfw_actions :
         file["object"].text_editor.LineDuplicate()
         file["object"].text_editor.LineDown()
         
-    def OnOpen(self, event):
-        infofile = self.treectrl.GetItemPyData(event.GetItem())
+    def OpenFile(self, event, path=None):
+        select = self.treectrl.GetItemPyData(self.treectrl.GetSelections()[0])
         
-        if infofile["idx"] is None:
+        if select["idx"] is None and select["file"]:
             panel = wx.Panel( self.notebook_files, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
             sizer = wx.BoxSizer( wx.VERTICAL )
 
-            object = create_text_editor(self, panel, infofile["path"])
+            object = create_text_editor(self, panel, select["path"])
 
             sizer.Add( object.text_editor , 1, wx.ALL|wx.EXPAND, 0 )
 
@@ -139,23 +163,93 @@ class wxpyfw_actions :
             panel.Layout()
             sizer.Fit( panel )
 
-            self.notebook_files.AddPage( panel, os.path.basename(infofile["path"]), True, wx.NullBitmap )
+            self.notebook_files.AddPage( panel, os.path.basename(select["path"]), True, wx.NullBitmap )
             
-            infofile["idx"] = self.notebook_files.GetSelection()
+            select["idx"] = self.notebook_files.GetSelection()
             
             TAB.append({
-                'name'  :   infofile["name"],
-                'path'  :   infofile["path"],
-                'item'  :   infofile["item"],
+                'name'  :   select["name"],
+                'path'  :   select["path"],
+                'item'  :   select["item"],
                 'panel' :   panel,
                 'sizer' :   sizer,
                 'object' :  object,
                 'modified'  : False
             })
                                     
-            self.treectrl.SetItemPyData(event.GetItem(), infofile)
+            self.treectrl.SetItemPyData(self.treectrl.GetSelections()[0], select)
         else :
-            self.notebook_files.SetSelection(infofile["idx"])
+            self.notebook_files.SetSelection(select["idx"])
+        
+    def SaveFile(self, event):
+        idx = self.notebook_files.GetSelection()
+        file = TAB[idx]
+        
+        wx.BeginBusyCursor()
+        try :
+            file["object"].text_editor.SaveFile(file["path"])
+        except :
+            logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))    
+        else :
+            self.notebook_files.SetPageText(idx, "%s" % file["name"])
+
+        wx.EndBusyCursor()
+    
+    def NewFile(self, event):
+        select = self.treectrl.GetItemPyData(self.treectrl.GetSelections()[0])
+        
+        try :
+            self.dialog = self.res.LoadDialog(self.panel, 'newfile')
+            
+            wx.xrc.XRCCTRL(self.dialog, 'path').SetPath(select["path"])
+        
+            wx.xrc.XRCCTRL(self.dialog, 'create').Bind(wx.EVT_BUTTON, self.CreateAndOpenFile)
+
+            self.dialog.Show()
+        except :
+            logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
+    
+    def CreateAndOpenFile(self, event):
+        select = self.treectrl.GetItemPyData(self.treectrl.GetSelections()[0])
+
+        f = open(wx.xrc.XRCCTRL(self.dialog, 'path').GetPath(), 'a')
+        f.close()
+        
+        self.refresh_treectrl(select["path"])
+        
+        #self.treectrl.SelectItem()
+        
+        self.dialog.Destroy()
+        
+    
+    def OpenMenu(self, event):
+        select = self.treectrl.GetItemPyData(event.GetItem())
+        
+        try :
+            menu = self.res.LoadMenu("menu_tree")
+            
+            if select["file"] :
+                menu.Remove(wx.xrc.XRCID("tree_new"))
+                menu.Remove(wx.xrc.XRCID("tree_find"))
+                menu.Remove(wx.xrc.XRCID("tree_paste"))
+                
+                menu.Bind(wx.EVT_MENU, self.OpenFile, id=wx.xrc.XRCID("tree_open"))
+                menu.Bind(wx.EVT_MENU, self.CutFile, id=wx.xrc.XRCID("tree_cut"))
+                menu.Bind(wx.EVT_MENU, self.CopyFile, id=wx.xrc.XRCID("tree_copy"))
+                menu.Bind(wx.EVT_MENU, self.DeleteFile, id=wx.xrc.XRCID("tree_delete"))
+                #wx.xrc.XRCID("open").Enabled(False)
+            else :
+                #wx.xrc.XRCID("insert").Enabled(False)
+                menu.Remove(wx.xrc.XRCID("tree_open"))
+                
+                menu.Bind(wx.EVT_MENU, self.NewFile, id=wx.xrc.XRCID("tree_new"))
+                menu.Bind(wx.EVT_MENU, self.PasteFile, id=wx.xrc.XRCID("tree_paste"))
+
+        except :
+            logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))    
+        else :
+            x,y = event.GetPoint()
+            self.frame.PopupMenu( menu, wx.Point(x - 10, y + 45))
     
             
 class view_wxpyfw(wxpyfw_actions):
@@ -181,10 +275,19 @@ class view_wxpyfw(wxpyfw_actions):
         #self.menuBar = self.res.LoadMenuBar("MenuBar")
         self.menuBar = self.frame.GetMenuBar()
         
+        self.frame.Bind(wx.EVT_MENU, self.SaveFile, id=wx.xrc.XRCID("save"))
+
+
+        self.frame.Bind(wx.EVT_MENU, self.CutLine, id=wx.xrc.XRCID("cut"))
+        self.frame.Bind(wx.EVT_MENU, self.CopyLine, id=wx.xrc.XRCID("copy"))
+        self.frame.Bind(wx.EVT_MENU, self.PasteLine, id=wx.xrc.XRCID("paste"))
+        self.frame.Bind(wx.EVT_MENU, self.DeleteLine, id=wx.xrc.XRCID("delete"))
+
+        
         self.frame.Bind(wx.EVT_MENU, self.ToggleComment, id=wx.xrc.XRCID("comment"))
-        self.frame.Bind(wx.EVT_MENU, self.DeleteLine, id=wx.xrc.XRCID("delete_line"))
         self.frame.Bind(wx.EVT_MENU, self.DuplicateUp, id=wx.xrc.XRCID("duplicate_up"))
         self.frame.Bind(wx.EVT_MENU, self.DuplicateDw, id=wx.xrc.XRCID("duplicate_dw"))
+        
         self.frame.Bind(wx.EVT_MENU, self.LoadOptions, id=wx.xrc.XRCID("options"))
         
          #self.frame.SetMenuBar(self.menuBar)
@@ -192,11 +295,13 @@ class view_wxpyfw(wxpyfw_actions):
     def create_treectrl(self):
         try :
             self.treectrl = wx.xrc.XRCCTRL(self.panel_left, "project_tree")
-            self.treectrl.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OnOpen)
         except :
             logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))    
         else :
             try :
+                self.treectrl.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OpenFile)
+                self.treectrl.Bind(wx.EVT_TREE_ITEM_RIGHT_CLICK, self.OpenMenu)
+            
                 self.treectrl_il = wx.ImageList(16,16)
                 self.treectrl.AssignImageList(self.treectrl_il)
 
@@ -224,7 +329,12 @@ class view_wxpyfw(wxpyfw_actions):
                         self.treectrl.CollapseAllChildren(newItem)
             except :
                 logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
-                
+    
+    def refresh_treectrl(self, path):
+        self.treectrl.DeleteChildren(self.treectrl.GetSelections()[0])
+        
+        self.popolate_treectrl(self.treectrl.GetSelections()[0], self.list_file_dir(path))
+        
     
     def popolate_treectrl(self, parent, trees, project=False):
         
@@ -240,7 +350,8 @@ class view_wxpyfw(wxpyfw_actions):
             for item in trees :
                 if type(item) == str:
                     newItem = self.treectrl.AppendItem(parent, os.path.basename(item))
-                    self.treectrl.SetItemPyData(newItem, {'item' : newItem, 'path' : item,  'name' : os.path.basename(item), 'idx' : None} )
+                    self.treectrl.SetItemPyData(newItem, {'item' : newItem, 'path' : item,  'name' : os.path.basename(item), 'idx' : None, "file" : True} )
+                    
                     name, ext = os.path.splitext(item)
                     if ext not in icons :
                         self.treectrl.SetItemImage(newItem, icons["*"], wx.TreeItemIcon_Normal)
@@ -248,6 +359,7 @@ class view_wxpyfw(wxpyfw_actions):
                         self.treectrl.SetItemImage(newItem, icons[ext], wx.TreeItemIcon_Normal)
                 else:
                     newItem = self.treectrl.AppendItem(parent, os.path.basename(item[0]))
+                    self.treectrl.SetItemPyData(newItem, {'item' : newItem, 'path' : item[0],  'name' : os.path.basename(item[0]), 'idx' : None, "file" : False} )
                     self.treectrl.SetItemImage(newItem, folder, wx.TreeItemIcon_Normal)
                     if len(item)> 1 :
                         self.popolate_treectrl(newItem, item[1])

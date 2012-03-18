@@ -42,5 +42,3 @@ class window(wx.App):
         else :
             init = getattr(module, "controller_%s" % (controller))
             return init(self)
-            
-        

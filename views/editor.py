@@ -73,7 +73,7 @@ class code_editor(wx.stc.StyledTextCtrl):
         self.SetProperty("fold", "1")
         self.SetMargins(0, 0)
         self.SetViewWhiteSpace(False)
-        self.SetEdgeMode(wx.stc.STC_EDGE_BACKGROUND)
+        #self.SetEdgeMode(wx.stc.STC_EDGE_BACKGROUND)
         self.SetEdgeColumn(78)
         self.SetCaretForeground("blue")
 
@@ -108,7 +108,7 @@ class code_editor(wx.stc.StyledTextCtrl):
         # global default styles for all languages
         # set default font
         self.StyleSetSpec(wx.stc.STC_STYLE_DEFAULT,
-            "fore:%(color)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("Default"))
+            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("Default"))
         # set default background color
         #beige = '#F5F5DC'
         #self.StyleSetBackground(style=wx.stc.STC_STYLE_DEFAULT)
@@ -117,61 +117,61 @@ class code_editor(wx.stc.StyledTextCtrl):
 
         # more global default styles for all languages
         self.StyleSetSpec(wx.stc.STC_STYLE_LINENUMBER,
-            "fore:%(color)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("LINENUMBER"))
+            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("LINENUMBER"))
         self.StyleSetSpec(wx.stc.STC_STYLE_CONTROLCHAR,
-            "fore:%(color)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("CONTRLCHAR"))
+            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("CONTRLCHAR"))
         self.StyleSetSpec(wx.stc.STC_STYLE_BRACELIGHT,
-            "fore:%(color)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("BRACELIGHT"))
+            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("BRACELIGHT"))
         self.StyleSetSpec(wx.stc.STC_STYLE_BRACEBAD,
-            "fore:%(color)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("BRACEBAD"))
+            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("BRACEBAD"))
 
         # make the Python styles ...
         # default
         self.StyleSetSpec(wx.stc.STC_P_DEFAULT,
-            "fore:%(color)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("DEFAULT"))
+            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("DEFAULT"))
         # comments
         self.StyleSetSpec(wx.stc.STC_P_COMMENTLINE,
-            "fore:%(color)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("COMMENTLINE"))
+            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("COMMENTLINE"))
         # number
         self.StyleSetSpec(wx.stc.STC_P_NUMBER,
-            "fore:%(color)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("NUMBER"))
+            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("NUMBER"))
         # string
         self.StyleSetSpec(wx.stc.STC_P_STRING,
-            "fore:%(color)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("STRING"))
+            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("STRING"))
         # single quoted string
         self.StyleSetSpec(wx.stc.STC_P_CHARACTER,
-            "fore:%(color)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("CHARACTER"))
+            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("CHARACTER"))
         # keyword
         self.StyleSetSpec(wx.stc.STC_P_WORD,
-            "fore:%(color)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("WORD"))
+            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("WORD"))
         # triple quotes
         self.StyleSetSpec(wx.stc.STC_P_TRIPLE,
-            "fore:%(color)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("TRIPLE"))
+            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("TRIPLE"))
 
         # triple double quotes
         self.StyleSetSpec(wx.stc.STC_P_TRIPLEDOUBLE,
-            "fore:%(color)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("TRIPLEDOUBLE"))
+            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("TRIPLEDOUBLE"))
 
         # class name definition
         self.StyleSetSpec(wx.stc.STC_P_CLASSNAME,
-            "fore:%(color)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("CLASSNAME"))
+            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("CLASSNAME"))
             
         # function or method name definition
         self.StyleSetSpec(wx.stc.STC_P_DEFNAME,
-            "fore:%(color)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("DEFNAME"))
+            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("DEFNAME"))
         # operators
         self.StyleSetSpec(wx.stc.STC_P_OPERATOR,
-            "fore:%(color)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("OPERATOR"))
+            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("OPERATOR"))
         # identifiers
         self.StyleSetSpec(wx.stc.STC_P_IDENTIFIER,
-            "fore:%(color)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("IDENTIFIER"))
+            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("IDENTIFIER"))
         # comment-blocks
         self.StyleSetSpec(wx.stc.STC_P_COMMENTBLOCK,
-            "fore:%(color)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("COMMENTBLOCK"))
+            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("COMMENTBLOCK"))
 
         # end of line where string is not closed
         self.StyleSetSpec(wx.stc.STC_P_STRINGEOL,
-            "fore:%(color)s,back:%(back)s,eol,size:%(size)d,%(weight)s" % get_styles("STRINGEOL"))
+            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("STRINGEOL"))
         # register some images for use in the AutoComplete box
         self.RegisterImage(1,
             wx.ArtProvider.GetBitmap(wx.ART_TIP, size=(16,16)))
