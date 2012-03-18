@@ -7,6 +7,7 @@ __date__ ="$14-mar-2012 20.30.02$"
 import os
 import wx
 import sys
+import shutil
 import traceback
 
 from widget import *
@@ -27,19 +28,22 @@ class model_wxpyfw:
         print "cut"
     def PasteFile(self, event):
         print "paste"
-    def DeleteFile(self, event):
+        
+    def TreeDelete(self, event):
         select = self.treectrl.GetItemPyData(self.treectrl.GetSelections()[0])
         
         if(wx.MessageBox("Are you sure you want to delete %s?" % select["name"], "Delete...", wx.YES_NO | wx.CANCEL | wx.YES_DEFAULT, self.notebook_files)==wx.YES) :
             wx.BeginBusyCursor()
             
             try :
-                #os.remove(select["path"])
+                if select["type"] == "File" :
+                    os.remove(select["path"])
+                elif select["type"] in ("Project", "Directory") :
+                    shutil.rmtree(select["path"])
+                #print self.treectrl.GetItemPyData(self.treectrl.GetItemParent(select["item"]))
                 
-                print select["item"]
-                print self.treectrl.GetItemPyData(self.treectrl.GetItem(self.treectrl.GetItemParent(select["item"])))["path"]
-                self.refresh_treectrl(self.treectrl.GetItemPyData(self.treectrl.GetItem(self.treectrl.GetItemParent(select["item"])))["path"])
-
+                self.treectrl.SelectItem(self.treectrl.GetItemParent(select["item"]))
+                self.refresh_treectrl(self.treectrl.GetItemPyData(self.treectrl.GetItemParent(select["item"]))["path"])
             except :
                 logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
             

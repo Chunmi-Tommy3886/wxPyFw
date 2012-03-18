@@ -25,6 +25,7 @@ if wx.Platform == '__WXMSW__':
 else:
     faces = syntax.configfile["Other"]
 
+faces["tabsize"] = int(faces["tabsize"])
 faces["little"] = int(faces["little"])
 faces["normal"] = int(faces["normal"])
 faces["large"] = int(faces["large"])
@@ -75,7 +76,11 @@ class code_editor(wx.stc.StyledTextCtrl):
         self.SetViewWhiteSpace(False)
         #self.SetEdgeMode(wx.stc.STC_EDGE_BACKGROUND)
         self.SetEdgeColumn(78)
-        self.SetCaretForeground("blue")
+        self.SetCaretForeground("black")
+        self.SetCaretWidth(2)
+        self.SetCaretLineVisible(True)
+        self.SetCaretLineBack('#eeeed1')
+        self.SetTabWidth(faces["tabsize"])
 
         # setup a margin to hold the fold markers
         self.SetMarginType(2, wx.stc.STC_MARGIN_SYMBOL)
@@ -171,7 +176,7 @@ class code_editor(wx.stc.StyledTextCtrl):
 
         # end of line where string is not closed
         self.StyleSetSpec(wx.stc.STC_P_STRINGEOL,
-            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("STRINGEOL"))
+            "fore:%(color)s,face:%(font)s,eol,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("STRINGEOL"))
         # register some images for use in the AutoComplete box
         self.RegisterImage(1,
             wx.ArtProvider.GetBitmap(wx.ART_TIP, size=(16,16)))
@@ -192,10 +197,16 @@ class code_editor(wx.stc.StyledTextCtrl):
                 self.CallTipShow(pos, 'show tip stuff')
             # code completion (needs more work)
             else:
+                pos = self.GetCurrentPos()
+                start = self.WordStartPosition(pos, 1)
+                end = self.WordEndPosition(pos, 1)
+                
+                print pos, start, end
                 kw = keyword.kwlist[:]
                 # optionally add more ...
-                kw.append("__init__?3")
+                kw.append("__init__(self):?2")
                 # Python sorts are case sensitive
+                #kw.sort(key=self.StartsWith)
                 kw.sort()
                 # so this needs to match 
                 self.AutoCompSetIgnoreCase(False) 
@@ -203,10 +214,11 @@ class code_editor(wx.stc.StyledTextCtrl):
                 for i in range(len(kw)):
                     if kw[i] in keyword.kwlist:
                         kw[i] = kw[i] + "?1"
-                self.AutoCompShow(0, " ".join(kw))
+                        
+                self.AutoCompShow((pos-start), " ". join(kw))
         else:
             event.Skip()
-
+            
     def onUpdateUI(self, evt):
         """update the user interface"""
         # check for matching braces

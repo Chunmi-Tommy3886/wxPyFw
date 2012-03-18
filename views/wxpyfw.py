@@ -150,7 +150,7 @@ class wxpyfw_actions :
     def OpenFile(self, event, path=None):
         select = self.treectrl.GetItemPyData(self.treectrl.GetSelections()[0])
         
-        if select["idx"] is None and select["file"]:
+        if select["idx"] is None and select["type"] == "File":
             panel = wx.Panel( self.notebook_files, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
             sizer = wx.BoxSizer( wx.VERTICAL )
 
@@ -228,7 +228,7 @@ class wxpyfw_actions :
         try :
             menu = self.res.LoadMenu("menu_tree")
             
-            if select["file"] :
+            if select["type"] == "File" :
                 menu.Remove(wx.xrc.XRCID("tree_new"))
                 menu.Remove(wx.xrc.XRCID("tree_find"))
                 menu.Remove(wx.xrc.XRCID("tree_paste"))
@@ -236,7 +236,6 @@ class wxpyfw_actions :
                 menu.Bind(wx.EVT_MENU, self.OpenFile, id=wx.xrc.XRCID("tree_open"))
                 menu.Bind(wx.EVT_MENU, self.CutFile, id=wx.xrc.XRCID("tree_cut"))
                 menu.Bind(wx.EVT_MENU, self.CopyFile, id=wx.xrc.XRCID("tree_copy"))
-                menu.Bind(wx.EVT_MENU, self.DeleteFile, id=wx.xrc.XRCID("tree_delete"))
                 #wx.xrc.XRCID("open").Enabled(False)
             else :
                 #wx.xrc.XRCID("insert").Enabled(False)
@@ -244,6 +243,8 @@ class wxpyfw_actions :
                 
                 menu.Bind(wx.EVT_MENU, self.NewFile, id=wx.xrc.XRCID("tree_new"))
                 menu.Bind(wx.EVT_MENU, self.PasteFile, id=wx.xrc.XRCID("tree_paste"))
+
+            menu.Bind(wx.EVT_MENU, self.TreeDelete, id=wx.xrc.XRCID("tree_delete"))
 
         except :
             logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))    
@@ -316,6 +317,9 @@ class view_wxpyfw(wxpyfw_actions):
                 for project in self.projects :
                     newItem = self.treectrl.AppendItem(root, project)
                     
+                    self.treectrl.SetItemPyData(newItem, {'item' : newItem, 'path' : self.projects[project]["path"],  'name' : project, 'idx' : None, "type" : "Project"} )
+
+
                     self.treectrl.SetItemImage(newItem, prj_py, wx.TreeItemIcon_Normal)
                     tree_data = self.list_file_dir(self.projects[project]["path"], eval(self.projects[project]["show_hidden"]))
                     
@@ -350,7 +354,7 @@ class view_wxpyfw(wxpyfw_actions):
             for item in trees :
                 if type(item) == str:
                     newItem = self.treectrl.AppendItem(parent, os.path.basename(item))
-                    self.treectrl.SetItemPyData(newItem, {'item' : newItem, 'path' : item,  'name' : os.path.basename(item), 'idx' : None, "file" : True} )
+                    self.treectrl.SetItemPyData(newItem, {'item' : newItem, 'path' : item,  'name' : os.path.basename(item), 'idx' : None, "type" : "File"} )
                     
                     name, ext = os.path.splitext(item)
                     if ext not in icons :
@@ -359,7 +363,7 @@ class view_wxpyfw(wxpyfw_actions):
                         self.treectrl.SetItemImage(newItem, icons[ext], wx.TreeItemIcon_Normal)
                 else:
                     newItem = self.treectrl.AppendItem(parent, os.path.basename(item[0]))
-                    self.treectrl.SetItemPyData(newItem, {'item' : newItem, 'path' : item[0],  'name' : os.path.basename(item[0]), 'idx' : None, "file" : False} )
+                    self.treectrl.SetItemPyData(newItem, {'item' : newItem, 'path' : item[0],  'name' : os.path.basename(item[0]), 'idx' : None, "type" : "Directory"} )
                     self.treectrl.SetItemImage(newItem, folder, wx.TreeItemIcon_Normal)
                     if len(item)> 1 :
                         self.popolate_treectrl(newItem, item[1])

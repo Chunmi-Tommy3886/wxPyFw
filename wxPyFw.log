@@ -1,4 +1,2 @@
-18/03/2012 01:55:26 [ERROR][(<class controllers.newfile.controller_newfile at 0x02BC2E70>, 'newfile.py', 32)]: 'NoneType' object is unsubscriptable 
-18/03/2012 02:23:35 [ERROR][(<class controllers.wxpyfw.controller_wxpyfw at 0x019D5AB0>, 'wxpyfw.py', 42)]: coercing to Unicode: need string or buffer, TreeItemId found 
-18/03/2012 02:25:30 [ERROR][(<class controllers.wxpyfw.controller_wxpyfw at 0x01985A80>, 'wxpyfw.py', 44)]: 'TreeItemId' object has no attribute 'GetItemPyData' 
-18/03/2012 02:27:08 [ERROR][(<class controllers.wxpyfw.controller_wxpyfw at 0x01905A80>, 'wxpyfw.py', 44)]: 'TreeCtrl' object has no attribute 'GetItem' 
+18/03/2012 13:21:49 [ERROR][(<class views.wxpyfw.create_text_editor at 0x01925300>, 'wxpyfw.py', 43)]: in method 'StyledTextCtrl_SetTabWidth', expected argument 2 of type 'int' 
+18/03/2012 13:22:34 [ERROR][(<class views.wxpyfw.create_text_editor at 0x01905300>, 'wxpyfw.py', 43)]: in method 'StyledTextCtrl_SetTabWidth', expected argument 2 of type 'int' 
