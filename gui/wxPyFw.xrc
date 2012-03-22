@@ -18,10 +18,47 @@
 					<orient>wxVERTICAL</orient>
 					<object class="sizeritem">
 						<option>1</option>
-						<flag>wxEXPAND</flag>
-						<border>5</border>
-						<object class="wxTreeCtrl" name="project_tree">
-							<style>wxTR_HAS_BUTTONS|wxTR_HIDE_ROOT|wxTR_LINES_AT_ROOT|wxSUNKEN_BORDER</style>
+						<flag>wxEXPAND | wxALL</flag>
+						<border>0</border>
+						<object class="wxNotebook" name="left_notebook">
+							<object class="notebookpage">
+								<label>Projects</label>
+								<selected>1</selected>
+								<object class="wxPanel" name="project_panel">
+									<style>wxTAB_TRAVERSAL</style>
+									<object class="wxBoxSizer">
+										<orient>wxVERTICAL</orient>
+										<object class="sizeritem">
+											<option>1</option>
+											<flag>wxEXPAND</flag>
+											<border>0</border>
+											<object class="wxTreeCtrl" name="project_tree">
+												<style>wxTR_HAS_BUTTONS|wxTR_HIDE_ROOT|wxTR_LINES_AT_ROOT|wxSUNKEN_BORDER</style>
+											</object>
+										</object>
+									</object>
+								</object>
+							</object>
+							<object class="notebookpage">
+								<label>wx Tree</label>
+								<selected>0</selected>
+								<object class="wxPanel" name="wxtree">
+									<style>wxTAB_TRAVERSAL</style>
+									<enabled>0</enabled>
+									<object class="wxBoxSizer">
+										<orient>wxVERTICAL</orient>
+										<object class="sizeritem">
+											<option>1</option>
+											<flag>wxEXPAND</flag>
+											<border>5</border>
+											<object class="wxTreeCtrl" name="widget_tree">
+												<style>wxTR_HAS_BUTTONS|wxTR_HIDE_ROOT|wxTR_LINES_AT_ROOT|wxSUNKEN_BORDER</style>
+												<enabled>0</enabled>
+											</object>
+										</object>
+									</object>
+								</object>
+							</object>
 						</object>
 					</object>
 				</object>

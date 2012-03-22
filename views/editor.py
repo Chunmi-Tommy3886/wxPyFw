@@ -24,7 +24,33 @@ if wx.Platform == '__WXMSW__':
     faces = syntax["Windows"]
 else:
     faces = syntax["Other"]
+    
+  
+LANGUAGES = {
+                'container':wx.stc.STC_LEX_CONTAINER,
+                '.py':wx.stc.STC_LEX_PYTHON,
+                '.xml':wx.stc.STC_LEX_XML,
+                '.xrc':wx.stc.STC_LEX_XML,
+                'sql':wx.stc.STC_LEX_SQL,
+                'properties':wx.stc.STC_LEX_PROPERTIES,
+                'errorlist':wx.stc.STC_LEX_ERRORLIST,
+                'batch':wx.stc.STC_LEX_BATCH,
+                'xcode':wx.stc.STC_LEX_XCODE,
+                'diff':wx.stc.STC_LEX_DIFF,
+                'conf':wx.stc.STC_LEX_CONF,
+                'css':wx.stc.STC_LEX_CSS,
+                'nsis':wx.stc.STC_LEX_NSIS,
+                'mssql':wx.stc.STC_LEX_MSSQL,
+                'phpscript':wx.stc.STC_LEX_PHPSCRIPT,
+                'automatic':wx.stc.STC_LEX_AUTOMATIC
+}
 
+keywords = {
+                '.py'   :   keyword.kwlist,
+                '.xrc'   :   ["class", "name"]
+}
+                
+                
 faces["tabsize"] = int(faces["tabsize"])
 faces["little"] = int(faces["little"])
 faces["normal"] = int(faces["normal"])
@@ -64,11 +90,17 @@ class code_editor(wx.stc.StyledTextCtrl):
     """
     set up for folding and Python code highlighting
     """
-    def __init__(self, parent):
+    def __init__(self, parent, ext):
         wx.stc.StyledTextCtrl.__init__(self, parent, wx.ID_ANY)
         # use Python code highlighting
-        self.SetLexer(wx.stc.STC_LEX_PYTHON)
-        self.SetKeyWords(0, " ".join(keyword.kwlist))
+        if ext in LANGUAGES :
+            self.SetLexer(LANGUAGES[ext])
+        else :
+            self.SetLexer(LANGUAGES["automatic"])
+        
+        self.extension = ext
+
+        self.SetKeyWords(0, " ".join(keywords[ext]))
 
         # set other options ...
         self.SetProperty("fold", "1")
@@ -201,8 +233,7 @@ class code_editor(wx.stc.StyledTextCtrl):
                 start = self.WordStartPosition(pos, 1)
                 end = self.WordEndPosition(pos, 1)
                 
-                print pos, start, end
-                kw = keyword.kwlist[:]
+                kw = keywords[self.extension]
                 # optionally add more ...
                 kw.append("__init__(self):?2")
                 # Python sorts are case sensitive
@@ -212,7 +243,7 @@ class code_editor(wx.stc.StyledTextCtrl):
                 self.AutoCompSetIgnoreCase(False) 
                 # registered images are specified with appended "?type"
                 for i in range(len(kw)):
-                    if kw[i] in keyword.kwlist:
+                    if kw[i] in keywords[self.extension]:
                         kw[i] = kw[i] + "?1"
                         
                 self.AutoCompShow((pos-start), " ". join(kw))

@@ -22,10 +22,18 @@ from views.editor import code_editor
 TAB = list()
 
 Icons = {
-    '16'    :   {
+    'ProjectTree'    :   {
         'list'      :   wx.ImageList(16,16)
     },
-    'nb'    :   {
+    'WidgetTree'    :   {
+        'list'      :   wx.ImageList(16,16)
+    },
+    
+    'LeftNotebook'  :   {
+        'list'      :   wx.ImageList(16,16)
+    },
+    
+    'WidgetNotebook'    :   {
         'list'      :   wx.ImageList(16,16)
     },
     '32'    :   {
@@ -33,13 +41,24 @@ Icons = {
     }
 }
 
-Icons["16"].update({
-    'folder'    :   Icons["16"]["list"].Add(wx.Bitmap("images/16x16/folder.png", wx.BITMAP_TYPE_ANY)),
-    'project'   :   Icons["16"]["list"].Add(wx.Bitmap("images/16x16/python.png", wx.BITMAP_TYPE_ANY)),
-    '.py'       :   Icons["16"]["list"].Add(wx.Bitmap("images/16x16/py.png", wx.BITMAP_TYPE_ANY)),
-    '.ini'      :   Icons["16"]["list"].Add(wx.Bitmap("images/16x16/ini.png", wx.BITMAP_TYPE_ANY)),
-    '*'         :   Icons["16"]["list"].Add(wx.Bitmap("images/16x16/file.png", wx.BITMAP_TYPE_ANY))
+EditableFile = [ ".py", ".xrc", ".xml", ".ini"]
+
+Icons["ProjectTree"].update({
+    'folder'    :   Icons["ProjectTree"]["list"].Add(wx.Bitmap("images/16x16/folder.png", wx.BITMAP_TYPE_ANY)),
+    'project'   :   Icons["ProjectTree"]["list"].Add(wx.Bitmap("images/16x16/python.png", wx.BITMAP_TYPE_ANY)),
+    '.py'       :   Icons["ProjectTree"]["list"].Add(wx.Bitmap("images/16x16/py.png", wx.BITMAP_TYPE_ANY)),
+    '.xrc'      :   Icons["ProjectTree"]["list"].Add(wx.Bitmap("images/16x16/xrc.png", wx.BITMAP_TYPE_ANY)),
+    '.png'      :   Icons["ProjectTree"]["list"].Add(wx.Bitmap("images/16x16/img.png", wx.BITMAP_TYPE_ANY)),
+    '.bmp'      :   Icons["ProjectTree"]["list"].Add(wx.Bitmap("images/16x16/img.png", wx.BITMAP_TYPE_ANY)),
+    '.xpm'      :   Icons["ProjectTree"]["list"].Add(wx.Bitmap("images/16x16/img.png", wx.BITMAP_TYPE_ANY)),
+    '.ini'      :   Icons["ProjectTree"]["list"].Add(wx.Bitmap("images/16x16/ini.png", wx.BITMAP_TYPE_ANY)),
+    '*'         :   Icons["ProjectTree"]["list"].Add(wx.Bitmap("images/16x16/file.png", wx.BITMAP_TYPE_ANY))
 })
+Icons["LeftNotebook"].update({
+    'project'   :   Icons["ProjectTree"]["list"].Add(wx.Bitmap("images/16x16/package.png", wx.BITMAP_TYPE_ANY)),
+    'xrc'      :   Icons["ProjectTree"]["list"].Add(wx.Bitmap("images/16x16/xrc.png", wx.BITMAP_TYPE_ANY)),
+})
+
 Icons["32"].update({
     'empty_project'   :   Icons["32"]["list"].Add(wx.Bitmap("images/32x32/python.png", wx.BITMAP_TYPE_ANY)),
     'mvc_project'   :   Icons["32"]["list"].Add(wx.Bitmap("images/32x32/package.png", wx.BITMAP_TYPE_ANY)),
@@ -53,10 +72,12 @@ class create_text_editor :
         self.panel = panel
         self.file = file
         self.notebook_files = window.notebook_files
-        self.treectrl = window.treectrl
+        self.project_tree = window.project_tree
         
         try :
-            self.text_editor = code_editor(panel)
+            name, ext = os.path.splitext(file)
+            self.text_editor = code_editor(panel, ext)
+            
             self.text_editor.LoadFile(file)
             self.text_editor.EmptyUndoBuffer()
 
@@ -88,7 +109,7 @@ class create_text_editor :
         file = TAB[idx]
         
         if file["object"].text_editor.GetModify() :
-            if(wx.MessageBox("File %s is modified. Save It?" % file["name"], "Save...", wx.YES_NO | wx.CANCEL | wx.YES_DEFAULT, self.notebook_files)==wx.YES) :
+            if(wx.MessageBox("File %s is modified. Save It?" % file["name"], "Save...", wx.YES_NO | wx.CANCEL | wx.YES_DEFAULT | wx.ICON_QUESTION, self.notebook_files)==wx.YES) :
                 wx.BeginBusyCursor()
                 
                 try :
@@ -97,10 +118,10 @@ class create_text_editor :
                     logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))    
                     
                 else :
-                    info = self.treectrl.GetItemPyData(TAB[idx]["item"])
+                    info = self.project_tree.GetItemPyData(TAB[idx]["item"])
                     info["idx"] = None
                     
-                    self.treectrl.SetItemPyData(TAB[idx]["item"], info)
+                    self.project_tree.SetItemPyData(TAB[idx]["item"], info)
                     
                     del TAB[idx]
 
@@ -175,39 +196,47 @@ class wxpyfw_actions :
         file["object"].text_editor.LineDown()
         
     def OpenFile(self, event,):
-        select = self.treectrl.GetItemPyData(self.treectrl.GetSelections()[0])
+        select = self.project_tree.GetItemPyData(self.project_tree.GetSelections()[0])
         
-        if select["idx"] is None and select["type"] == "File":
-            panel = wx.Panel( self.notebook_files, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
-            sizer = wx.BoxSizer( wx.VERTICAL )
+        if select["type"] in EditableFile :
+            if select["idx"] is None :
+                panel = wx.Panel( self.notebook_files, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+                sizer = wx.BoxSizer( wx.VERTICAL )
 
-            object = create_text_editor(self, panel, select["path"])
+                object = create_text_editor(self, panel, select["path"])
 
-            sizer.Add( object.text_editor , 1, wx.ALL|wx.EXPAND, 0 )
+                sizer.Add( object.text_editor , 1, wx.ALL|wx.EXPAND, 0 )
 
-            sizer.Layout()
-            panel.SetSizer( sizer )
-            panel.Layout()
-            sizer.Fit( panel )
+                sizer.Layout()
+                panel.SetSizer( sizer )
+                panel.Layout()
+                sizer.Fit( panel )
 
-            self.notebook_files.AddPage( panel, os.path.basename(select["path"]), True, wx.NullBitmap )
-            
-            select["idx"] = self.notebook_files.GetSelection()
-            
-            TAB.append({
-                'name'  :   select["name"],
-                'path'  :   select["path"],
-                'item'  :   select["item"],
-                'panel' :   panel,
-                'sizer' :   sizer,
-                'object' :  object,
-                'modified'  : False
-            })
-                                    
-            self.treectrl.SetItemPyData(self.treectrl.GetSelections()[0], select)
+                self.notebook_files.AddPage( panel, os.path.basename(select["path"]), True, wx.NullBitmap )
+
+                select["idx"] = self.notebook_files.GetSelection()
+
+                TAB.append({
+                    'name'  :   select["name"],
+                    'path'  :   select["path"],
+                    'item'  :   select["item"],
+                    'panel' :   panel,
+                    'sizer' :   sizer,
+                    'object' :  object,
+                    'modified'  : False
+                })
+
+                self.project_tree.SetItemPyData(self.project_tree.GetSelections()[0], select)
+                
+                if select["type"] in (".xrc", ".xml") :
+                    self.popolate_widget_tree()
+            else :
+                self.notebook_files.SetSelection(select["idx"])
         else :
-            self.notebook_files.SetSelection(select["idx"])
-        
+            mess = wx.MessageBox("File %s not editable." % select["name"], "Unknown Type...", wx.OK | wx.ICON_EXCLAMATION, self.panel_left)
+
+                
+
     def SaveFile(self, event):
         idx = self.notebook_files.GetSelection()
         file = TAB[idx]
@@ -223,7 +252,7 @@ class wxpyfw_actions :
         wx.EndBusyCursor()
         
     def SetMain(self, event):
-        select = self.treectrl.GetItemPyData(self.treectrl.GetSelections()[0])
+        select = self.project_tree.GetItemPyData(self.project_tree.GetSelections()[0])
         for project in self.projects :
             self.projects[project]["main"] = False
 
@@ -231,18 +260,18 @@ class wxpyfw_actions :
                     
         self.projects.write()
         
-        self.treectrl.SetItemBold(select["item"], True)
+        self.project_tree.SetItemBold(select["item"], True)
 
-        #self.treectrl.CollapseAllChildren(self.treectrl.GetRootItem())
+        #self.project_tree.CollapseAllChildren(self.project_tree.GetRootItem())
                 
-        self.treectrl.UnselectAll()
+        self.project_tree.UnselectAll()
                 
-        self.treectrl.Expand(select["item"])
+        self.project_tree.Expand(select["item"])
 
-        self.treectrl.SelectItem(select["item"], True)
+        self.project_tree.SelectItem(select["item"], True)
         
     def UnsetMain(self, event):
-        select = self.treectrl.GetItemPyData(self.treectrl.GetSelections()[0])
+        select = self.project_tree.GetItemPyData(self.project_tree.GetSelections()[0])
         
         self.projects[select["name"]]["main"] = False
                     
@@ -280,13 +309,13 @@ class wxpyfw_actions :
                 if not os.path.exists(path) :
                     os.makedirs(path)
                     
-            newItem = self.treectrl.AppendItem(self.treectrl.GetRootItem(), name)
-            self.treectrl.SetItemPyData(newItem, {'item' : newItem, 'path' : path,  'name' : name, 'idx' : None, "type" : "Project"} )
-            self.treectrl.SetItemImage(newItem, Icons["16"]["project"], wx.TreeItemIcon_Normal)
+            newItem = self.project_tree.AppendItem(self.project_tree.GetRootItem(), name)
+            self.project_tree.SetItemPyData(newItem, {'item' : newItem, 'path' : path,  'name' : name, 'idx' : None, "type" : "Project"} )
+            self.project_tree.SetItemImage(newItem, Icons["ProjectTree"]["project"], wx.TreeItemIcon_Normal)
             
             tree_data = self.list_file_dir(path, False)
             
-            self.popolate_treectrl(newItem, tree_data, True)
+            self.popolate_project_tree(newItem, tree_data, True)
 
             if main:
                 for project in self.projects :
@@ -294,20 +323,20 @@ class wxpyfw_actions :
                     
                 self.projects.write()
                 
-                self.treectrl.SetItemBold(newItem, True)
+                self.project_tree.SetItemBold(newItem, True)
                     
             if open :
-                #self.treectrl.CollapseAllChildren(self.treectrl.GetRootItem())
+                #self.project_tree.CollapseAllChildren(self.project_tree.GetRootItem())
                 
-                self.treectrl.UnselectAll()
+                self.project_tree.UnselectAll()
                 
-                self.treectrl.Expand(newItem)
+                self.project_tree.Expand(newItem)
 
-                self.treectrl.SelectItem(newItem, True)
+                self.project_tree.SelectItem(newItem, True)
             
             else :
-                self.treectrl.Collapse(newItem)
-                self.treectrl.CollapseAllChildren(newItem)
+                self.project_tree.Collapse(newItem)
+                self.project_tree.CollapseAllChildren(newItem)
                 
             self.CreateProject(name, path, open, main)
 
@@ -315,9 +344,10 @@ class wxpyfw_actions :
             logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
     
     def NewFile(self, event):
-        select = self.treectrl.GetItemPyData(self.treectrl.GetSelections()[0])
+        select = self.project_tree.GetItemPyData(self.project_tree.GetSelections()[0])
         
-        wildcard = "Python source (*.py)|*.py|" \
+        wildcard =  "Python Source (*.py)|*.py|" \
+                    "XRC File(*.xrc)|*.xrc|" \
                     "Configuration File (*.ini)|*.ini|" \
                     "Other files (*.*)|*.*"
         try :
@@ -327,24 +357,24 @@ class wxpyfw_actions :
                 f = open(self.dialog.GetPath(), 'a')
                 f.close()
                 
-                newItem = self.treectrl.AppendItem(select["item"], os.path.basename(self.dialog.GetPath()))
-                self.treectrl.SetItemPyData(newItem, {'item' : newItem, 'path' : self.dialog.GetPath(),  'name' : os.path.basename(self.dialog.GetPath()), 'idx' : None, "type" : "File"} )
-
+                newItem = self.project_tree.AppendItem(select["item"], os.path.basename(self.dialog.GetPath()))
                 name, ext = os.path.splitext(self.dialog.GetPath())
-                if ext not in Icons["16"] :
-                    self.treectrl.SetItemImage(newItem, Icons["16"]["*"], wx.TreeItemIcon_Normal)
+                if ext not in Icons["ProjectTree"] :
+                    self.project_tree.SetItemImage(newItem, Icons["ProjectTree"]["*"], wx.TreeItemIcon_Normal)
                 else :
-                    self.treectrl.SetItemImage(newItem, Icons["16"][ext], wx.TreeItemIcon_Normal)
+                    self.project_tree.SetItemImage(newItem, Icons["ProjectTree"][ext], wx.TreeItemIcon_Normal)
+
+                self.project_tree.SetItemPyData(newItem, {'item' : newItem, 'path' : self.dialog.GetPath(),  'name' : os.path.basename(self.dialog.GetPath()), 'idx' : None, "ext" : ext} )
+
+                #self.refresh_project_tree(select["path"])
                 
-                #self.refresh_treectrl(select["path"])
-                
-                self.treectrl.SelectItem(newItem)
+                self.project_tree.SelectItem(newItem)
                 self.OpenFile(None)
         except :
             logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
             
     def NewFolder(self, event):
-        select = self.treectrl.GetItemPyData(self.treectrl.GetSelections()[0])
+        select = self.project_tree.GetItemPyData(self.project_tree.GetSelections()[0])
         try :
             self.dialog = wx.DirDialog(None, "Directory", select["path"], wx.SAVE)
             if self.dialog.ShowModal() == wx.ID_OK:
@@ -352,26 +382,26 @@ class wxpyfw_actions :
 #                f = open(self.dialog.GetPath(), 'a')
 #                f.close()
 #                
-                newItem = self.treectrl.AppendItem(select["item"], os.path.basename(self.dialog.GetPath()))
-                self.treectrl.SetItemPyData(newItem, {'item' : newItem, 'path' : self.dialog.GetPath(),  'name' : os.path.basename(self.dialog.GetPath()), 'idx' : None, "type" : "Folder"} )
+                newItem = self.project_tree.AppendItem(select["item"], os.path.basename(self.dialog.GetPath()))
+                self.project_tree.SetItemPyData(newItem, {'item' : newItem, 'path' : self.dialog.GetPath(),  'name' : os.path.basename(self.dialog.GetPath()), 'idx' : None, "type" : "Folder"} )
 #
 #                name, ext = os.path.splitext(self.dialog.GetPath())
-#                if ext not in Icons["16"] :
-#                    self.treectrl.SetItemImage(newItem, Icons["16"]["*"], wx.TreeItemIcon_Normal)
+#                if ext not in Icons["ProjectTree"] :
+#                    self.project_tree.SetItemImage(newItem, Icons["ProjectTree"]["*"], wx.TreeItemIcon_Normal)
 #                else :
-                self.treectrl.SetItemImage(newItem, Icons["16"]["folder"], wx.TreeItemIcon_Normal)
+                self.project_tree.SetItemImage(newItem, Icons["ProjectTree"]["folder"], wx.TreeItemIcon_Normal)
 #                
-#                #self.refresh_treectrl(select["path"])
+#                #self.refresh_project_tree(select["path"])
 #                
-                self.treectrl.SelectItem(newItem)
+                self.project_tree.SelectItem(newItem)
 #                self.OpenFile(None)
         except :
             logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
         
     
     def OpenMenu(self, event):
-        select = self.treectrl.GetItemPyData(event.GetItem())
-        self.treectrl.SelectItem(event.GetItem(), True)
+        select = self.project_tree.GetItemPyData(event.GetItem())
+        self.project_tree.SelectItem(event.GetItem(), True)
         
         try :
             menu = self.res.LoadMenu("menu_tree")
@@ -430,15 +460,15 @@ class view_wxpyfw(wxpyfw_actions):
 
         self.panel_right = wx.xrc.XRCCTRL(self.panel, 'panel_right')
         
-        self.create_menubar()
+        self.init_menubar()
         
-        self.create_treectrl()
+        self.init_left_notebook()
+
+        self.init_widget_notebook()
         
-        self.create_notebook_widget()
-        
-        self.create_notebook_files()
+        self.init_notebook_files()
     
-    def create_menubar(self):
+    def init_menubar(self):
         #self.menuBar = self.res.LoadMenuBar("MenuBar")
         self.menuBar = self.frame.GetMenuBar()
         
@@ -460,90 +490,171 @@ class view_wxpyfw(wxpyfw_actions):
         
          #self.frame.SetMenuBar(self.menuBar)
 
-    def create_treectrl(self):
+    def init_left_notebook(self) :
         try :
-            self.treectrl = wx.xrc.XRCCTRL(self.panel_left, "project_tree")
+            left_notebook = wx.xrc.XRCCTRL(self.panel, "left_notebook")
+            left_notebook.AssignImageList( Icons["LeftNotebook"]["list"] )
         except :
             logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))    
+        
         else :
             try :
-                self.treectrl.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OpenFile)
-                self.treectrl.Bind(wx.EVT_TREE_ITEM_RIGHT_CLICK, self.OpenMenu)
+                self.init_project_tree(left_notebook)
+        
+                self.init_widget_tree(left_notebook)
+            except :
+                logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
+        
+    def init_project_tree(self, notebook):
+        try :
+            self.project_tree = wx.xrc.XRCCTRL(self.panel_left, "project_tree")
+        except :
+            logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
             
-                self.treectrl.AssignImageList(Icons["16"]["list"])
+        else :
+            try :
+                self.project_tree.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OpenFile)
+                self.project_tree.Bind(wx.EVT_TREE_ITEM_RIGHT_CLICK, self.OpenMenu)
+            
+                self.project_tree.AssignImageList(Icons["ProjectTree"]["list"])
                 
-                root = self.treectrl.AddRoot("Progetti")
+                root = self.project_tree.AddRoot("Progetti")
 
             except :
                 logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
             
             try :
                 for project in self.projects :
-                    newItem = self.treectrl.AppendItem(root, project)
-                    self.treectrl.SetItemPyData(newItem, {'item' : newItem, 'path' : self.projects[project]["path"],  'name' : project, 'idx' : None, "type" : "Project"} )
+                    newItem = self.project_tree.AppendItem(root, project)
+                    self.project_tree.SetItemPyData(newItem, {'item' : newItem, 'path' : self.projects[project]["path"],  'name' : project, 'idx' : None, "type" : "Project"} )
 
-                    self.treectrl.SetItemImage(newItem, Icons["16"]["project"], wx.TreeItemIcon_Normal)
+                    self.project_tree.SetItemImage(newItem, Icons["ProjectTree"]["project"], wx.TreeItemIcon_Normal)
                     tree_data = self.list_file_dir(self.projects[project]["path"], eval(self.projects[project]["hidden"]))
                     
-                    self.popolate_treectrl(newItem, tree_data, True)
+                    self.popolate_project_tree(newItem, tree_data, True)
 
                     if eval(self.projects[project]["main"]):
-                        self.treectrl.SetItemBold(newItem, eval(self.projects[project]["main"]))
-                        self.treectrl.Expand(newItem)
+                        self.project_tree.SetItemBold(newItem, eval(self.projects[project]["main"]))
+                        self.project_tree.Expand(newItem)
                     else :
-                        self.treectrl.Collapse(newItem)
-                        self.treectrl.CollapseAllChildren(newItem)
+                        self.project_tree.Collapse(newItem)
+                        self.project_tree.CollapseAllChildren(newItem)
+            
+                notebook.SetPageImage( 0, Icons["LeftNotebook"]["project"])
+            
             except :
                 logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
     
-    def refresh_treectrl(self, path):
-        self.treectrl.DeleteChildren(self.treectrl.GetSelections()[0])
+    def init_widget_tree(self, notebook):
+        try :
+            self.widget_tree = wx.xrc.XRCCTRL(self.panel_left, "widget_tree")
+        except :
+            logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))    
+        else :
+            try :
+                #self.widget_tree.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OpenFile)
+                #self.project_tree.Bind(wx.EVT_TREE_ITEM_RIGHT_CLICK, self.OpenMenu)
+            
+                self.widget_tree.AssignImageList(Icons["WidgetTree"]["list"])
+                
+                root = self.widget_tree.AddRoot("Progetti")
+
+            except :
+                logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
+            else :
+                notebook.SetPageImage( 1, Icons["LeftNotebook"]["xrc"])
+#            try :
+#                for project in self.projects :
+#                    newItem = self.project_tree.AppendItem(root, project)
+#                    self.project_tree.SetItemPyData(newItem, {'item' : newItem, 'path' : self.projects[project]["path"],  'name' : project, 'idx' : None, "type" : "Project"} )
+#
+#                    self.project_tree.SetItemImage(newItem, Icons["ProjectTree"]["project"], wx.TreeItemIcon_Normal)
+#                    tree_data = self.list_file_dir(self.projects[project]["path"], eval(self.projects[project]["hidden"]))
+#                    
+#                    self.popolate_project_tree(newItem, tree_data, True)
+#
+#                    if eval(self.projects[project]["main"]):
+#                        self.project_tree.SetItemBold(newItem, eval(self.projects[project]["main"]))
+#                        self.project_tree.Expand(newItem)
+#                    else :
+#                        self.project_tree.Collapse(newItem)
+#                        self.project_tree.CollapseAllChildren(newItem)
+#            except :
+#                logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
+    
+    def refresh_project_tree(self, path):
+        self.project_tree.DeleteChildren(self.project_tree.GetSelections()[0])
         
-        self.popolate_treectrl(self.treectrl.GetSelections()[0], self.list_file_dir(path))
+        self.popolate_project_tree(self.project_tree.GetSelections()[0], self.list_file_dir(path))
         
     
-    def popolate_treectrl(self, parent, trees, project=False):
+    def popolate_project_tree(self, parent, trees, project=False):
         try :
             for item in trees :
                 if type(item) == str:
-                    newItem = self.treectrl.AppendItem(parent, os.path.basename(item))
-                    self.treectrl.SetItemPyData(newItem, {'item' : newItem, 'path' : item,  'name' : os.path.basename(item), 'idx' : None, "type" : "File"} )
-                    
+                    newItem = self.project_tree.AppendItem(parent, os.path.basename(item))
                     name, ext = os.path.splitext(item)
-                    if ext not in Icons["16"] :
-                        self.treectrl.SetItemImage(newItem, Icons["16"]["*"], wx.TreeItemIcon_Normal)
+                    if ext not in Icons["ProjectTree"] :
+                        self.project_tree.SetItemImage(newItem, Icons["ProjectTree"]["*"], wx.TreeItemIcon_Normal)
                     else :
-                        self.treectrl.SetItemImage(newItem, Icons["16"][ext], wx.TreeItemIcon_Normal)
+                        self.project_tree.SetItemImage(newItem, Icons["ProjectTree"][ext], wx.TreeItemIcon_Normal)
+
+                    self.project_tree.SetItemPyData(newItem, {'item' : newItem, 'path' : item,  'name' : os.path.basename(item), 'idx' : None, "type" : ext} )
                 else:
-                    newItem = self.treectrl.AppendItem(parent, os.path.basename(item[0]))
-                    self.treectrl.SetItemPyData(newItem, {'item' : newItem, 'path' : item[0],  'name' : os.path.basename(item[0]), 'idx' : None, "type" : "Folder"} )
-                    self.treectrl.SetItemImage(newItem, Icons["16"]["folder"], wx.TreeItemIcon_Normal)
+                    newItem = self.project_tree.AppendItem(parent, os.path.basename(item[0]))
+                    self.project_tree.SetItemPyData(newItem, {'item' : newItem, 'path' : item[0],  'name' : os.path.basename(item[0]), 'idx' : None, "type" : "Folder"} )
+                    self.project_tree.SetItemImage(newItem, Icons["ProjectTree"]["folder"], wx.TreeItemIcon_Normal)
                     if len(item)> 1 :
-                        self.popolate_treectrl(newItem, item[1])
+                        self.popolate_project_tree(newItem, item[1])
         except :
-            logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))            
-    
-    def create_notebook_widget(self):
+            logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
+            
+    def popolate_widget_tree(self):
+        select = self.project_tree.GetItemPyData(self.project_tree.GetSelections()[0])
+
         try :
-            self.notebook_widget = wx.xrc.XRCCTRL(self.panel, "widget_notebook")
-            self.notebook_widget.DeleteAllPages()
+            for item in self.ParseXRC(select["path"]) :
+                print item
+#            for item in trees :
+#                if type(item) == str:
+#                    newItem = self.project_tree.AppendItem(parent, os.path.basename(item))
+#                    name, ext = os.path.splitext(item)
+#                    if ext not in Icons["ProjectTree"] :
+#                        self.project_tree.SetItemImage(newItem, Icons["ProjectTree"]["*"], wx.TreeItemIcon_Normal)
+#                    else :
+#                        self.project_tree.SetItemImage(newItem, Icons["ProjectTree"][ext], wx.TreeItemIcon_Normal)
+#
+#                    self.project_tree.SetItemPyData(newItem, {'item' : newItem, 'path' : item,  'name' : os.path.basename(item), 'idx' : None, "type" : ext} )
+#                else:
+#                    newItem = self.project_tree.AppendItem(parent, os.path.basename(item[0]))
+#                    self.project_tree.SetItemPyData(newItem, {'item' : newItem, 'path' : item[0],  'name' : os.path.basename(item[0]), 'idx' : None, "type" : "Folder"} )
+#                    self.project_tree.SetItemImage(newItem, Icons["ProjectTree"]["folder"], wx.TreeItemIcon_Normal)
+#                    if len(item)> 1 :
+#                        self.popolate_project_tree(newItem, item[1])
+        except :
+            logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
+    
+    def init_widget_notebook(self):
+        try :
+            self.widget_notebook = wx.xrc.XRCCTRL(self.panel, "widget_notebook")
+            self.widget_notebook.DeleteAllPages()
+            self.widget_notebook.AssignImageList( Icons["WidgetNotebook"]["list"] )
+
         except :
             logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))    
         
         else :
             try :
-                self.popolate_notebook_widget(self.widget())
+                self.popolate_widget_notebook(self.widget())
             except :
                 logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
         
-    def popolate_notebook_widget(self, widget):
-        self.notebook_widget.AssignImageList( Icons["nb"]["list"] )
-        
+    def popolate_widget_notebook(self, widget):
         x = 0
         for inifile in widget :
             for tabs in widget[inifile] :
                 if tabs not in ["Default"] :
-                    panel = wx.Panel( self.notebook_widget, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+                    panel = wx.Panel( self.widget_notebook, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
                     sizer = wx.BoxSizer( wx.VERTICAL )
                     toolbar = wx.ToolBar( panel, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TB_HORIZONTAL )
                     
@@ -582,17 +693,17 @@ class view_wxpyfw(wxpyfw_actions):
                     panel.Layout()
                     sizer.Fit( panel )
 
-                    self.notebook_widget.AddPage(panel, tabs, False )
+                    self.widget_notebook.AddPage(panel, tabs, False )
                     
                     if "icon" in widget[inifile][tabs] :
-                        Icons["nb"].update({
-                            '%s' % (widget[inifile][tabs]["icon"]) : Icons["nb"]["list"].Add( wx.Bitmap( "images/%s/%s" % (widget[inifile]["Default"]["icons"], widget[inifile][tabs]["icon"]), wx.BITMAP_TYPE_ANY ))
+                        Icons["WidgetNotebook"].update({
+                            '%s' % (widget[inifile][tabs]["icon"]) : Icons["WidgetNotebook"]["list"].Add( wx.Bitmap( "images/%s/%s" % (widget[inifile]["Default"]["icons"], widget[inifile][tabs]["icon"]), wx.BITMAP_TYPE_ANY ))
                         })
-                        self.notebook_widget.SetPageImage( x, Icons["nb"][widget[inifile][tabs]["icon"]])
+                        self.widget_notebook.SetPageImage( x, Icons["WidgetNotebook"][widget[inifile][tabs]["icon"]])
                     x += 1
 
     
-    def create_notebook_files(self):
+    def init_notebook_files(self):
         self.notebook_files = wx.lib.agw.aui.AuiNotebook( self.panel_right, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.aui.AUI_NB_CLOSE_ON_ALL_TABS|wx.aui.AUI_NB_DEFAULT_STYLE|wx.aui.AUI_NB_SCROLL_BUTTONS|wx.aui.AUI_NB_TAB_MOVE|wx.aui.AUI_NB_WINDOWLIST_BUTTON )
         self.panel_right.GetSizer().Add( self.notebook_files, 1, wx.EXPAND |wx.ALL, 0 )
         self.panel_right.Layout()

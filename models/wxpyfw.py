@@ -10,6 +10,8 @@ import sys
 import shutil
 import traceback
 
+import xml.dom.minidom
+
 from widget import *
 
 from globals import *
@@ -17,6 +19,28 @@ from globals import *
 from globals.obj_cfg import o_cfg
 
 class model_wxpyfw:    
+    def ParseXRC(self, file):
+        parser = xml.dom.minidom.parse(file)
+        data = list()
+        
+        for siti in parser.getElementsByTagName("sitiweb"):
+            for sito in siti.getElementsByTagName("sitoweb"):
+                name = sito.getAttribute("name")
+                type = sito.getAttribute("type")
+                autore = None
+                indirizzo = None
+                for ninnolo in sito.getElementsByTagName("indirizzo"):
+                    for xo in ninnolo.childNodes:
+                        indirizzo = xo.data
+                for ninnolo in sito.getElementsByTagName("autore"):
+                    for xo in ninnolo.childNodes:
+                        autore = xo.data
+                dati[name] = { "type": type, "autore": autore, "indirizzo": indirizzo }
+
+        print dati
+        
+        return xml.dom.minidom.parse(file)
+    
     def CopyFile(self, event):
         print "copy"
     def CutFile(self, event):
