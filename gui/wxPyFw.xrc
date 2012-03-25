@@ -109,6 +109,29 @@
 							</object>
 						</object>
 					</object>
+					<object class="sizeritem">
+						<option>0</option>
+						<flag>wxEXPAND | wxALL</flag>
+						<border>5</border>
+						<object class="wxPanel" name="output">
+							<style>wxTAB_TRAVERSAL</style>
+							<hidden>1</hidden>
+							<object class="wxBoxSizer">
+								<orient>wxVERTICAL</orient>
+								<object class="sizeritem">
+									<option>0</option>
+									<flag>wxALL|wxEXPAND</flag>
+									<border>5</border>
+									<object class="wxTextCtrl" name="m_textCtrl2">
+										<style>wxTE_MULTILINE|wxTE_READONLY</style>
+										<size>-1,200</size>
+										<value></value>
+										<maxlength>0</maxlength>
+									</object>
+								</object>
+							</object>
+						</object>
+					</object>
 				</object>
 			</object>
 		</object>
@@ -166,6 +189,14 @@
 					<help></help>
 				</object>
 			</object>
+			<object class="wxMenu" name="run">
+				<label>Run</label>
+				<object class="wxMenuItem" name="run">
+					<label>Run Main Project\tF6</label>
+					<help></help>
+					<bitmap>C:\Users\Giuseppe Tripoli\Devel\Python\wxPyFw\images\16x16\run.png</bitmap>
+				</object>
+			</object>
 			<object class="wxMenu" name="tools">
 				<label>Tools</label>
 				<object class="wxMenuItem" name="options">
@@ -205,6 +236,13 @@
 				<tooltip></tooltip>
 				<longhelp></longhelp>
 				<bitmap>C:\Users\Giuseppe Tripoli\Devel\Python\wxPyFw\images\24x24\redo.png</bitmap>
+			</object>
+			<object class="separator" />
+			<object class="tool" name="run">
+				<label>Run</label>
+				<tooltip>Run Main Project</tooltip>
+				<longhelp>Run Main Project</longhelp>
+				<bitmap>C:\Users\Giuseppe Tripoli\Devel\Python\wxPyFw\images\24x24\run.png</bitmap>
 			</object>
 		</object>
 		<object class="wxStatusBar" name="m_statusBar1">
@@ -500,6 +538,10 @@
 			<help></help>
 		</object>
 		<object class="separator" />
+		<object class="wxMenuItem" name="tree_refresh">
+			<label>Refresh\tF5</label>
+			<help>Refresh</help>
+		</object>
 		<object class="wxMenuItem" name="tree_find">
 			<label>Find</label>
 			<help></help>

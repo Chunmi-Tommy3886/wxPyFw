@@ -10,10 +10,14 @@ __date__ ="$16-mar-2012 15.03.06$"
 # source: Dietrich  16NOV2008
 
 import wx
+import os
+import sys
 import wx.stc
 import keyword
+import traceback
 
 from globals.obj_cfg import o_cfg
+from globals import *
 
 syntax = o_cfg("publics\syntax.ini")
 
@@ -24,13 +28,19 @@ if wx.Platform == '__WXMSW__':
     faces = syntax["Windows"]
 else:
     faces = syntax["Other"]
-    
+
+EXT2LAN = {
+    ".py"   :   "Python",
+    ".xrc"   :   "XRC",
+    ".xgt"   :   "XML"
+}
   
 LANGUAGES = {
                 'container':wx.stc.STC_LEX_CONTAINER,
                 '.py':wx.stc.STC_LEX_PYTHON,
                 '.xml':wx.stc.STC_LEX_XML,
                 '.xrc':wx.stc.STC_LEX_XML,
+                '.xgt':wx.stc.STC_LEX_XML,
                 'sql':wx.stc.STC_LEX_SQL,
                 'properties':wx.stc.STC_LEX_PROPERTIES,
                 'errorlist':wx.stc.STC_LEX_ERRORLIST,
@@ -45,9 +55,11 @@ LANGUAGES = {
                 'automatic':wx.stc.STC_LEX_AUTOMATIC
 }
 
-keywords = {
+KEYWORDS = {
                 '.py'   :   keyword.kwlist,
-                '.xrc'   :   ["class", "name"]
+                '.xrc'  :   ["canvas", "window", "view", "button", "edittext", "text", "form", "calendar", "dataset", "datapath", "textctrl"],
+                '.xgt'  :   ["canvas", "window", "view", "button", "edittext", "text", "form", "calendar", "dataset", "datapath", "textctrl"],
+                '.xml'  :   ["canvas", "window", "view", "button", "edittext", "text", "form", "calendar", "dataset", "datapath", "textctrl"],
 }
                 
                 
@@ -56,167 +68,84 @@ faces["little"] = int(faces["little"])
 faces["normal"] = int(faces["normal"])
 faces["large"] = int(faces["large"])
 
-def get_styles(word):
+def get_styles(model, word):
     result = dict()
     
-    result["back"] = syntax["Python"]["Default"]["back"]
-    result["size"] = faces[syntax["Python"]["Default"]["size"]]
-    result["font"] = faces[syntax["Python"]["Default"]["font"]]
-    result["color"] = syntax["Python"]["Default"]["color"]
-    result["weight"] = syntax["Python"]["Default"]["weight"]
+    result["back"] = syntax[model]["DEFAULT"]["back"]
+    result["size"] = faces[syntax[model]["DEFAULT"]["size"]]
+    result["font"] = faces[syntax[model]["DEFAULT"]["font"]]
+    result["color"] = syntax[model]["DEFAULT"]["color"]
+    result["weight"] = syntax[model]["DEFAULT"]["weight"]
     
-    if word in syntax["Python"] :
-        if 'back' in syntax["Python"][word] :
-            result["back"] = syntax["Python"][word]["back"]
+    if word in syntax[model] :
+        if 'back' in syntax[model][word] :
+            result["back"] = syntax[model][word]["back"]
         
-        if 'size' in syntax["Python"][word] :
-            result["size"] = faces[syntax["Python"][word]["size"]]
+        if 'size' in syntax[model][word] :
+            result["size"] = faces[syntax[model][word]["size"]]
             
-        if 'font' in syntax["Python"][word] :
-            result["font"] = faces[syntax["Python"][word]["font"]]
+        if 'font' in syntax[model][word] :
+            result["font"] = faces[syntax[model][word]["font"]]
             
-        if 'color' in syntax["Python"][word] :
-            result["color"] = syntax["Python"][word]["color"]
+        if 'color' in syntax[model][word] :
+            result["color"] = syntax[model][word]["color"]
             
-        if 'weight' in syntax["Python"][word] :
-            if type(syntax["Python"][word]["weight"]) == str :
-                result["weight"] = syntax["Python"][word]["weight"]
+        if 'weight' in syntax[model][word] :
+            if type(syntax[model][word]["weight"]) == str :
+                result["weight"] = syntax[model][word]["weight"]
             else :
-                result["weight"] = ",".join(syntax["Python"][word]["weight"])
+                result["weight"] = ",".join(syntax[model][word]["weight"])
     
     return result
 
-class code_editor(wx.stc.StyledTextCtrl):
-    """
-    set up for folding and Python code highlighting
-    """
-    def __init__(self, parent, ext):
-        wx.stc.StyledTextCtrl.__init__(self, parent, wx.ID_ANY)
-        # use Python code highlighting
-        if ext in LANGUAGES :
-            self.SetLexer(LANGUAGES[ext])
-        else :
-            self.SetLexer(LANGUAGES["automatic"])
-        
-        self.extension = ext
-
-        self.SetKeyWords(0, " ".join(keywords[ext]))
-
-        # set other options ...
-        self.SetProperty("fold", "1")
-        self.SetMargins(0, 0)
-        self.SetViewWhiteSpace(False)
-        #self.SetEdgeMode(wx.stc.STC_EDGE_BACKGROUND)
-        self.SetEdgeColumn(78)
-        self.SetCaretForeground("black")
-        self.SetCaretWidth(2)
-        self.SetCaretLineVisible(True)
-        self.SetCaretLineBack('#eeeed1')
-        self.SetTabWidth(faces["tabsize"])
-
-        # setup a margin to hold the fold markers
-        self.SetMarginType(2, wx.stc.STC_MARGIN_SYMBOL)
-        self.SetMarginMask(2, wx.stc.STC_MASK_FOLDERS)
-        self.SetMarginSensitive(2, True)
-        self.SetMarginWidth(2, 12)
-
-        # fold markers use square headers
-        self.MarkerDefine(wx.stc.STC_MARKNUM_FOLDEROPEN,
-            wx.stc.STC_MARK_BOXMINUS, "white", "#808080")
-        self.MarkerDefine(wx.stc.STC_MARKNUM_FOLDER,
-            wx.stc.STC_MARK_BOXPLUS, "white", "#808080")
-        self.MarkerDefine(wx.stc.STC_MARKNUM_FOLDERSUB,
-            wx.stc.STC_MARK_VLINE, "white", "#808080")
-        self.MarkerDefine(wx.stc.STC_MARKNUM_FOLDERTAIL,
-            wx.stc.STC_MARK_LCORNER, "white", "#808080")
-        self.MarkerDefine(wx.stc.STC_MARKNUM_FOLDEREND,
-            wx.stc.STC_MARK_BOXPLUSCONNECTED, "white", "#808080")
-        self.MarkerDefine(wx.stc.STC_MARKNUM_FOLDEROPENMID,
-            wx.stc.STC_MARK_BOXMINUSCONNECTED, "white", "#808080")
-        self.MarkerDefine(wx.stc.STC_MARKNUM_FOLDERMIDTAIL,
-            wx.stc.STC_MARK_TCORNER, "white", "#808080")
-
-        # bind some events ...
-        self.Bind(wx.stc.EVT_STC_UPDATEUI, self.onUpdateUI)
-        self.Bind(wx.stc.EVT_STC_MARGINCLICK, self.onMarginClick)
-        self.Bind(wx.EVT_KEY_DOWN, self.onKeyPressed)
-
-        # make some general styles ...
-        # global default styles for all languages
-        # set default font
-        self.StyleSetSpec(wx.stc.STC_STYLE_DEFAULT,
-            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("Default"))
-        # set default background color
-        #beige = '#F5F5DC'
-        #self.StyleSetBackground(style=wx.stc.STC_STYLE_DEFAULT)
-        # reset all to be like the default
-        self.StyleClearAll() 
-
-        # more global default styles for all languages
-        self.StyleSetSpec(wx.stc.STC_STYLE_LINENUMBER,
-            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("LINENUMBER"))
-        self.StyleSetSpec(wx.stc.STC_STYLE_CONTROLCHAR,
-            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("CONTRLCHAR"))
-        self.StyleSetSpec(wx.stc.STC_STYLE_BRACELIGHT,
-            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("BRACELIGHT"))
-        self.StyleSetSpec(wx.stc.STC_STYLE_BRACEBAD,
-            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("BRACEBAD"))
-
-        # make the Python styles ...
-        # default
-        self.StyleSetSpec(wx.stc.STC_P_DEFAULT,
-            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("DEFAULT"))
-        # comments
-        self.StyleSetSpec(wx.stc.STC_P_COMMENTLINE,
-            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("COMMENTLINE"))
-        # number
-        self.StyleSetSpec(wx.stc.STC_P_NUMBER,
-            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("NUMBER"))
-        # string
-        self.StyleSetSpec(wx.stc.STC_P_STRING,
-            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("STRING"))
-        # single quoted string
-        self.StyleSetSpec(wx.stc.STC_P_CHARACTER,
-            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("CHARACTER"))
-        # keyword
-        self.StyleSetSpec(wx.stc.STC_P_WORD,
-            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("WORD"))
-        # triple quotes
-        self.StyleSetSpec(wx.stc.STC_P_TRIPLE,
-            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("TRIPLE"))
-
-        # triple double quotes
-        self.StyleSetSpec(wx.stc.STC_P_TRIPLEDOUBLE,
-            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("TRIPLEDOUBLE"))
-
-        # class name definition
-        self.StyleSetSpec(wx.stc.STC_P_CLASSNAME,
-            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("CLASSNAME"))
+class PyEditor(wx.stc.StyledTextCtrl):
+    def __init__(self, parent):
+        try :
+            wx.stc.StyledTextCtrl.__init__(self, parent)
+        except :
+            logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
             
-        # function or method name definition
-        self.StyleSetSpec(wx.stc.STC_P_DEFNAME,
-            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("DEFNAME"))
-        # operators
-        self.StyleSetSpec(wx.stc.STC_P_OPERATOR,
-            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("OPERATOR"))
-        # identifiers
-        self.StyleSetSpec(wx.stc.STC_P_IDENTIFIER,
-            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("IDENTIFIER"))
-        # comment-blocks
-        self.StyleSetSpec(wx.stc.STC_P_COMMENTBLOCK,
-            "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("COMMENTBLOCK"))
+        self.SetProperty("fold", "1")
+        self.SetLexer(wx.stc.STC_LEX_PYTHON)
+        self.SetKeyWords(0, " ".join(KEYWORDS[".py"]))
 
-        # end of line where string is not closed
-        self.StyleSetSpec(wx.stc.STC_P_STRINGEOL,
-            "fore:%(color)s,face:%(font)s,eol,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("STRINGEOL"))
-        # register some images for use in the AutoComplete box
-        self.RegisterImage(1,
-            wx.ArtProvider.GetBitmap(wx.ART_TIP, size=(16,16)))
-        self.RegisterImage(2,
-            wx.ArtProvider.GetBitmap(wx.ART_NEW, size=(16,16)))
-        self.RegisterImage(3,
-            wx.ArtProvider.GetBitmap(wx.ART_COPY, size=(16,16)))
 
+    def SetupColor(self):
+        try :
+            #Python Style
+            self.StyleSetSpec(wx.stc.STC_P_DEFAULT, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("Python", "DEFAULT"))
+            self.StyleSetSpec(wx.stc.STC_P_COMMENTLINE, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("Python","COMMENTLINE"))
+            self.StyleSetSpec(wx.stc.STC_P_NUMBER, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("Python","NUMBER"))
+            self.StyleSetSpec(wx.stc.STC_P_STRING, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("Python","STRING"))
+            self.StyleSetSpec(wx.stc.STC_P_CHARACTER, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("Python","CHARACTER"))
+            self.StyleSetSpec(wx.stc.STC_P_WORD, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("Python","WORD"))
+            self.StyleSetSpec(wx.stc.STC_P_TRIPLE, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("Python","TRIPLE"))
+            self.StyleSetSpec(wx.stc.STC_P_TRIPLEDOUBLE, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("Python","TRIPLEDOUBLE"))
+            self.StyleSetSpec(wx.stc.STC_P_CLASSNAME, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("Python","CLASSNAME"))
+            self.StyleSetSpec(wx.stc.STC_P_DEFNAME, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("Python","DEFNAME"))
+            self.StyleSetSpec(wx.stc.STC_P_OPERATOR, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("Python","OPERATOR"))
+            self.StyleSetSpec(wx.stc.STC_P_IDENTIFIER, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("Python", "IDENTIFIER"))
+            self.StyleSetSpec(wx.stc.STC_P_COMMENTBLOCK, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("Python","COMMENTBLOCK"))
+            self.StyleSetSpec(wx.stc.STC_P_STRINGEOL, "fore:%(color)s,face:%(font)s,eol,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("Python", "STRINGEOL"))
+        except :
+            logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
+            
+    def AutoComplete(self, event):
+        key = event.GetKeyCode()
+        if key == wx.WXK_NUMPAD_ENTER or key == wx.WXK_RETURN :
+            if self.GetCharAt(self.GetLineEndPosition(self.GetCurrentLine()-1)-1) == 58 :
+                self.SetLineIndentation(self.GetCurrentLine(), self.GetLineIndentation(self.GetCurrentLine())+self.GetTabWidth())
+                self.LineEnd()
+            else :
+                self.SetLineIndentation(self.GetCurrentLine(), self.GetLineIndentation(self.GetCurrentLine()-1))
+                self.LineEnd()
+        
+        if key == 306 and self.GetLine(self.GetCurrentLine()).find("def") != -1  :
+            self.AddText("self) :")
+            
+        if (key == wx.WXK_NUMPAD_ENTER or key == wx.WXK_RETURN) and self.GetLine(self.GetCurrentLine()-1).find("class") != -1  :
+            self.AddText("def __init__(self) :")
+            
     def onKeyPressed(self, event):
         if self.CallTipActive():
             self.CallTipCancel()
@@ -229,27 +158,21 @@ class code_editor(wx.stc.StyledTextCtrl):
                 self.CallTipShow(pos, 'show tip stuff')
             # code completion (needs more work)
             else:
-                pos = self.GetCurrentPos()
-                start = self.WordStartPosition(pos, 1)
-                end = self.WordEndPosition(pos, 1)
-                
-                kw = keywords[self.extension]
+                kw = KEYWORDS[".py"]
                 # optionally add more ...
-                kw.append("__init__(self):?2")
+                kw.append("__init__?3")
                 # Python sorts are case sensitive
-                #kw.sort(key=self.StartsWith)
                 kw.sort()
                 # so this needs to match 
                 self.AutoCompSetIgnoreCase(False) 
                 # registered images are specified with appended "?type"
                 for i in range(len(kw)):
-                    if kw[i] in keywords[self.extension]:
+                    if kw[i] in keyword.kwlist:
                         kw[i] = kw[i] + "?1"
-                        
-                self.AutoCompShow((pos-start), " ". join(kw))
+                self.AutoCompShow(0, " ".join(kw))
         else:
             event.Skip()
-            
+
     def onUpdateUI(self, evt):
         """update the user interface"""
         # check for matching braces
@@ -261,16 +184,14 @@ class code_editor(wx.stc.StyledTextCtrl):
             charBefore = self.GetCharAt(caretPos - 1)
             styleBefore = self.GetStyleAt(caretPos - 1)
         # check before
-        if charBefore and chr(charBefore) in "[]{}()"\
-                and styleBefore == wx.stc.STC_P_OPERATOR:
+        if charBefore and chr(charBefore) in "[]{}()" and styleBefore == stc.STC_P_OPERATOR:
             braceAtCaret = caretPos - 1
         # check after
         if braceAtCaret < 0:
             charAfter = self.GetCharAt(caretPos)
             styleAfter = self.GetStyleAt(caretPos)
 
-            if charAfter and chr(charAfter) in "[]{}()"\
-                    and styleAfter == wx.stc.STC_P_OPERATOR:
+            if charAfter and chr(charAfter) in "[]{}()" and styleAfter == stc.STC_P_OPERATOR:
                 braceAtCaret = caretPos
         if braceAtCaret >= 0:
             braceOpposite = self.BraceMatch(braceAtCaret)
@@ -279,27 +200,254 @@ class code_editor(wx.stc.StyledTextCtrl):
         else:
             self.BraceHighlight(braceAtCaret, braceOpposite)
 
-    def onMarginClick(self, evt):
+class XMLEditor(wx.stc.StyledTextCtrl):
+    def __init__(self, parent, filename=None):
+        try :
+            wx.stc.StyledTextCtrl.__init__(self, parent)
+        except :
+            logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
+        
+        self.SetProperty("fold", "1")
+        self.SetProperty("fold.html","1")
+        self.SetKeyWords(wx.stc.STC_LEX_XML, " ".join(KEYWORDS[".xml"]))
+        self.SetLexer(wx.stc.STC_LEX_XML)
+        
+    def SetupColor(self):
+        try :
+            # XML styles
+            self.StyleSetSpec(wx.stc.STC_H_DEFAULT, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("XML", "DEFAULT"))
+            self.StyleSetSpec(wx.stc.STC_H_COMMENT, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("XML", "COMMENT"))
+            self.StyleSetSpec(wx.stc.STC_H_NUMBER, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("XML", "NUMBER"))
+            self.StyleSetSpec(wx.stc.STC_H_SINGLESTRING, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("XML", "SINGLESTRING"))
+            self.StyleSetSpec(wx.stc.STC_H_DOUBLESTRING, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("XML", "DOUBLESTRING"))
+            self.StyleSetSpec(wx.stc.STC_H_XMLSTART, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("XML", "XMLSTART"))
+            self.StyleSetSpec(wx.stc.STC_H_XMLEND, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("XML", "XMLEND"))
+            self.StyleSetSpec(wx.stc.STC_H_TAG, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("XML", "TAG"))
+            self.StyleSetSpec(wx.stc.STC_H_TAGEND, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("XML", "TAGEND"))
+            self.StyleSetSpec(wx.stc.STC_H_ATTRIBUTE, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("XML", "ATTRIBUTE"))
+            self.StyleSetSpec(wx.stc.STC_H_CDATA, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("XML", "CDATA"))
+        except :
+            logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
+    
+    def AutoComplete(self, event):
+        key = event.GetKeyCode()
+        if key == wx.WXK_NUMPAD_ENTER or key == wx.WXK_RETURN :
+            if self.GetCharAt(self.GetLineEndPosition(self.GetCurrentLine()-1)-1) == 58 :
+                self.SetLineIndentation(self.GetCurrentLine(), self.GetLineIndentation(self.GetCurrentLine())+self.GetTabWidth())
+                self.LineEnd()
+            else :
+                self.SetLineIndentation(self.GetCurrentLine(), self.GetLineIndentation(self.GetCurrentLine()-1))
+                self.LineEnd()
+        
+        if key == 306 and self.GetLine(self.GetCurrentLine()).find("def") != -1  :
+            self.AddText("self) :")
+            
+        if (key == wx.WXK_NUMPAD_ENTER or key == wx.WXK_RETURN) and self.GetLine(self.GetCurrentLine()-1).find("class") != -1  :
+            self.AddText("def __init__(self) :")
+            
+    
+    def OnKeyPressed(self, event):
+        if self.CallTipActive():
+            self.CallTipCancel()
+        key = event.GetKeyCode()
+        
+        if key == 32 and event.ControlDown():
+            pos = self.GetCurrentPos()
+
+            # Tips
+            if event.ShiftDown():
+                self.CallTipSetBackground("yellow")
+                self.CallTipShow(pos, 'lots of of text: blah, blah, blah\n\n'
+                                 'show some suff, maybe parameters..\n\n'
+                                 'fubar(param1, param2)')
+            # Code completion
+            else:
+                pos = self.GetCurrentPos()
+                start = self.WordStartPosition(pos, 1)
+                end = self.WordEndPosition(pos, 1)
+                
+                kw = KEYWORDS[".xml"]
+                # optionally add more ...
+                #kw.append("__init__(self):?2")
+                # Python sorts are case sensitive
+                #kw.sort(key=self.StartsWith)
+                kw.sort()
+                # so this needs to match 
+                self.AutoCompSetIgnoreCase(False) 
+                # registered images are specified with appended "?type"
+                for i in range(len(kw)):
+                    if kw[i] in KEYWORDS[".xml"]:
+                        kw[i] = kw[i] + "?1"
+                        
+                self.AutoCompShow((pos-start), " ". join(kw))
+        else:
+            event.Skip()
+
+    def OnUpdateUI(self, evt):
+        # check for matching braces
+        braceAtCaret = -1
+        braceOpposite = -1
+        charBefore = None
+        caretPos = self.GetCurrentPos()
+
+        if caretPos > 0:
+            charBefore = self.GetCharAt(caretPos - 1)
+            styleBefore = self.GetStyleAt(caretPos - 1)
+
+        # check before
+        if charBefore and chr(charBefore) in "<>" and styleBefore == wx.stc.STC_H_TAG:
+            braceAtCaret = caretPos - 1 
+        # check after
+        if braceAtCaret < 0:
+            charAfter = self.GetCharAt(caretPos)
+            styleAfter = self.GetStyleAt(caretPos)
+
+            if charAfter and chr(charAfter) in "<>" and styleAfter == wx.stc.STC_H_TAG:
+                braceAtCaret = caretPos
+
+        if braceAtCaret >= 0:
+            braceOpposite = self.BraceMatch(braceAtCaret)
+        if braceAtCaret != -1  and braceOpposite == -1:
+            self.BraceBadLight(braceAtCaret)
+        else:
+            self.BraceHighlight(braceAtCaret, braceOpposite)
+
+class CodeEditor(PyEditor, XMLEditor):
+    def __init__(self, parent, filename):
+        name, ext = os.path.splitext(filename)
+        
+        if ext == ".py" :
+            PyEditor.__init__(self, parent)
+            PyEditor.SetupColor(self)
+            self.AutoComp = PyEditor.AutoComplete
+        else :
+            XMLEditor.__init__(self, parent)
+            XMLEditor.SetupColor(self)
+            self.AutoComp = XMLEditor.AutoComplete
+        
+        self.ext = ext
+            
+        self.SetupDefault()
+        
+        self.SetupEvent()
+        
+        self.SetupEvent()
+        
+        self.LoadFile(filename)
+    
+    def SetupDefault(self):
+        try :
+            # set other options ...
+            self.SetMargins(0, 0)
+            #self.SetViewWhiteSpace(False)
+            #self.SetViewWhiteSpace(True)
+
+            self.SetEdgeMode(wx.stc.STC_EDGE_LINE)
+
+            self.SetEdgeColumn(81)
+            self.SetCaretForeground("black")
+            self.SetCaretWidth(2)
+            self.SetCaretLineVisible(True)
+            self.SetCaretLineBack('#eeeed1')
+            self.SetTabWidth(faces["tabsize"])
+
+            self.SetViewEOL(False)
+
+
+            self.SetMarginType(2, wx.stc.STC_MARGIN_SYMBOL)
+            self.SetMarginMask(2, wx.stc.STC_MASK_FOLDERS)
+            self.SetMarginSensitive(2, True)
+            self.SetMarginWidth(2, 12)
+
+            self.MarkerDefine(wx.stc.STC_MARKNUM_FOLDEROPEN, wx.stc.STC_MARK_BOXMINUS, "white", "#808080")
+            self.MarkerDefine(wx.stc.STC_MARKNUM_FOLDER, wx.stc.STC_MARK_BOXPLUS, "white", "#808080")
+            self.MarkerDefine(wx.stc.STC_MARKNUM_FOLDERSUB, wx.stc.STC_MARK_VLINE, "white", "#808080")
+            self.MarkerDefine(wx.stc.STC_MARKNUM_FOLDERTAIL, wx.stc.STC_MARK_LCORNER, "white", "#808080")
+            self.MarkerDefine(wx.stc.STC_MARKNUM_FOLDEREND, wx.stc.STC_MARK_BOXPLUSCONNECTED, "white", "#808080")
+            self.MarkerDefine(wx.stc.STC_MARKNUM_FOLDEROPENMID, wx.stc.STC_MARK_BOXMINUSCONNECTED, "white", "#808080")
+            self.MarkerDefine(wx.stc.STC_MARKNUM_FOLDERMIDTAIL, wx.stc.STC_MARK_TCORNER, "white", "#808080")
+
+            self.StyleSetSpec(wx.stc.STC_STYLE_DEFAULT, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("DEFAULT", "DEFAULT"))
+
+            # more global default styles for all languages
+            self.StyleSetSpec(wx.stc.STC_STYLE_LINENUMBER, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("DEFAULT", "LINENUMBER"))
+            self.StyleSetSpec(wx.stc.STC_STYLE_CONTROLCHAR, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("DEFAULT", "CONTRLCHAR"))
+            self.StyleSetSpec(wx.stc.STC_STYLE_BRACELIGHT, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("DEFAULT", "BRACELIGHT"))
+            self.StyleSetSpec(wx.stc.STC_STYLE_BRACEBAD, "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("DEFAULT", "BRACEBAD"))
+            self.StyleSetSpec(wx.stc.STC_STYLE_LASTPREDEFINED,  "fore:%(color)s,face:%(font)s,back:%(back)s,size:%(size)d,%(weight)s" % get_styles("DEFAULT", "LASTPREDEFINED"))
+
+            # register some images for use in the AutoComplete box
+            self.RegisterImage(1, wx.ArtProvider.GetBitmap(wx.ART_TIP, size=(16,16)))
+            self.RegisterImage(2, wx.ArtProvider.GetBitmap(wx.ART_NEW, size=(16,16)))
+            self.RegisterImage(3, wx.ArtProvider.GetBitmap(wx.ART_COPY, size=(16,16)))
+        except :
+            logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
+            
+    
+    def SetupEvent(self):
+        try :
+            self.Bind(wx.EVT_KEY_UP, self.AutoIndent)
+            self.Bind(wx.stc.EVT_STC_MARGINCLICK, self.OnMarginClick)
+            self.Bind(wx.EVT_KEY_DOWN, self.OnKeyPressed)
+            self.Bind(wx.stc.EVT_STC_UPDATEUI, self.OnUpdateUI)
+
+        except :
+            logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
+    
+    def AutoIndent(self, event):
+        key = event.GetKeyCode()
+        if key == wx.WXK_NUMPAD_ENTER or key == wx.WXK_RETURN :
+            
+            if self.GetCharAt(self.GetLineEndPosition(self.GetCurrentLine()-1)-1) == 58 :   #char :        
+                
+                self.SetLineIndentation(self.GetCurrentLine(), int(self.GetLineIndentation(self.GetCurrentLine()-1)))
+                
+                self.LineEnd()
+            elif self.GetCharAt(self.GetLineEndPosition(self.GetCurrentLine()-1)-1) == 62 : #char >
+                if self.GetCharAt(self.GetLineEndPosition(self.GetCurrentLine()-1)-2) != 47 : #char /
+                    #print "Line:", self.GetCurrentLine()-1, " Text:", self.GetLine(self.GetCurrentLine()-1), " Ident:", self.GetLineIndentation(self.GetCurrentLine()-1), " Tab:", self.GetTabWidth()
+
+                    self.SetLineIndentation(self.GetCurrentLine(), int(self.GetLineIndentation(self.GetCurrentLine()-1)))
+
+                    #print "Line:", self.GetCurrentLine(), " Text:", self.GetLine(self.GetCurrentLine()), " Ident:", self.GetLineIndentation(self.GetCurrentLine()), " Tab:", self.GetTabWidth()
+
+                    self.LineEnd()
+            else :
+                self.SetLineIndentation(self.GetCurrentLine(), self.GetLineIndentation(self.GetCurrentLine()-1))
+                self.LineEnd()
+                
+            self.AutoComp(self, event)
+            
+        if event.ControlDown() :
+            if key == wx.WXK_TAB :
+                if self.GetLine(self.GetCurrentLine()).find("{") != -1 :
+                    event.StopPropagation()
+                    self.SetSelection(self.FindText(0, self.GetTextLength(), "{", 0), self.FindText(0, self.GetTextLength(), "}", 0)+1)
+                
+
+    def OnMarginClick(self, evt):
         # fold and unfold as needed
         if evt.GetMargin() == 2:
             if evt.GetShift() and evt.GetControl():
-                self.foldAll()
+                self.FoldAll()
             else:
                 lineClicked = self.LineFromPosition(evt.GetPosition())
-                if self.GetFoldLevel(lineClicked) &\
-                        wx.stc.STC_FOLDLEVELHEADERFLAG:
+
+                if self.GetFoldLevel(lineClicked) & wx.stc.STC_FOLDLEVELHEADERFLAG:
                     if evt.GetShift():
-                        self.SetFoldexpanded(lineClicked, True)
-                        self.expand(lineClicked, True, True, 1)
+                        self.SetFoldExpanded(lineClicked, True)
+                        self.Expand(lineClicked, True, True, 1)
                     elif evt.GetControl():
-                        if self.GetFoldexpanded(lineClicked):
-                            self.SetFoldexpanded(lineClicked, False)
-                            self.expand(lineClicked, False, True, 0)
+                        if self.GetFoldExpanded(lineClicked):
+                            self.SetFoldExpanded(lineClicked, False)
+                            self.Expand(lineClicked, False, True, 0)
                         else:
-                            self.SetFoldexpanded(lineClicked, True)
-                            self.expand(lineClicked, True, True, 100)
+                            self.SetFoldExpanded(lineClicked, True)
+                            self.Expand(lineClicked, True, True, 100)
                     else:
                         self.ToggleFold(lineClicked)
+                        
+                        
 
     def foldAll(self):
         """folding folds, marker - to +"""
@@ -359,18 +507,12 @@ class code_editor(wx.stc.StyledTextCtrl):
                 line = line + 1;
         return line
 
-
-class MyFrame(wx.Frame):
-    def __init__(self, parent, mytitle, mysize):
-        wx.Frame.__init__(self, parent, wx.ID_ANY, mytitle, size=mysize)
-
-        stc_edit = MySTC(self)
-
-        # open a Python code file you have ...
-        py_file = "wxstc_basics1.py"
-        stc_edit.SetText(open(py_file).read())
-        stc_edit.EmptyUndoBuffer()
-
-        # line numbers in the margin
-        stc_edit.SetMarginType(1, wx.stc.STC_MARGIN_NUMBER)
-        stc_edit.SetMarginWidth(1, 25)
+    def DoPrettyPrint(self):
+        doc = etree.parse(StringIO(self.GetText()))
+        self.SetText(etree.tostring(doc, pretty_print=True))
+    
+    def DoUndo(self):
+        pass
+    
+    def Redo(self):
+        pass

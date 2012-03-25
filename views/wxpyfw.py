@@ -9,6 +9,7 @@ import wx.xrc
 import wx.aui
 import wx.wizard
 import traceback
+import subprocess
 import wx.lib.agw.aui
 
 from widget import *
@@ -17,7 +18,7 @@ from globals import *
 
 from publics import *
 
-from views.editor import code_editor
+from views.editor import CodeEditor
 
 TAB = list()
 
@@ -41,13 +42,14 @@ Icons = {
     }
 }
 
-EditableFile = [ ".py", ".xrc", ".xml", ".ini"]
+EditableFile = [ ".py", ".xrc", ".xml", ".ini", ".xgt"]
 
 Icons["ProjectTree"].update({
     'folder'    :   Icons["ProjectTree"]["list"].Add(wx.Bitmap("images/16x16/folder.png", wx.BITMAP_TYPE_ANY)),
     'project'   :   Icons["ProjectTree"]["list"].Add(wx.Bitmap("images/16x16/python.png", wx.BITMAP_TYPE_ANY)),
     '.py'       :   Icons["ProjectTree"]["list"].Add(wx.Bitmap("images/16x16/py.png", wx.BITMAP_TYPE_ANY)),
     '.xrc'      :   Icons["ProjectTree"]["list"].Add(wx.Bitmap("images/16x16/xrc.png", wx.BITMAP_TYPE_ANY)),
+    '.xgt'      :   Icons["ProjectTree"]["list"].Add(wx.Bitmap("images/16x16/xrc.png", wx.BITMAP_TYPE_ANY)),
     '.png'      :   Icons["ProjectTree"]["list"].Add(wx.Bitmap("images/16x16/img.png", wx.BITMAP_TYPE_ANY)),
     '.bmp'      :   Icons["ProjectTree"]["list"].Add(wx.Bitmap("images/16x16/img.png", wx.BITMAP_TYPE_ANY)),
     '.xpm'      :   Icons["ProjectTree"]["list"].Add(wx.Bitmap("images/16x16/img.png", wx.BITMAP_TYPE_ANY)),
@@ -66,6 +68,8 @@ Icons["32"].update({
     'empty_file'  :   Icons["32"]["list"].Add(wx.Bitmap("images/32x32/new_file.png", wx.BITMAP_TYPE_ANY)),
 })
 
+Tools = {}
+
 class create_text_editor :
     def __init__(self, window, panel, file):
         
@@ -75,13 +79,11 @@ class create_text_editor :
         self.project_tree = window.project_tree
         
         try :
-            name, ext = os.path.splitext(file)
-            self.text_editor = code_editor(panel, ext)
+            self.text_editor = CodeEditor(panel, file)
             
-            self.text_editor.LoadFile(file)
             self.text_editor.EmptyUndoBuffer()
 
-            self.text_editor.Bind(wx.EVT_KEY_DOWN, self.SetModifiedFile)
+            #self.text_editor.Bind(wx.EVT_KEY_DOWN, self.SetModifiedFile)
 
             # line numbers in the margin
             self.text_editor.SetMarginType(1, wx.stc.STC_MARGIN_NUMBER)
@@ -194,7 +196,22 @@ class wxpyfw_actions :
         file = TAB[idx]
         file["object"].text_editor.LineDuplicate()
         file["object"].text_editor.LineDown()
-        
+    
+    def RunProject(self, event):
+        for project in self.projects :
+            if eval(self.projects[project]["main"]) :
+                if "init" not in self.projects[project] :
+                    dialog = wx.FileDialog(None, "Set INIT file", self.projects[project]["path"],  "", "Python Source (*.py)|*.py" , wx.OPEN)
+                    if dialog.ShowModal() == wx.ID_OK:
+                    
+                        self.projects[project]["init"] = dialog.GetPath()
+                    
+                        self.projects.write()
+                
+                #wx.xrc.XRCCTRL(self.panel_right, "output").Show()
+                
+                execfile("%s" % self.projects[project]["init"])
+                
     def OpenFile(self, event,):
         select = self.project_tree.GetItemPyData(self.project_tree.GetSelections()[0])
         
@@ -228,8 +245,8 @@ class wxpyfw_actions :
 
                 self.project_tree.SetItemPyData(self.project_tree.GetSelections()[0], select)
                 
-                if select["type"] in (".xrc", ".xml") :
-                    self.popolate_widget_tree()
+#                if select["type"] in (".xrc", ".xml") :
+#                    self.popolate_widget_tree()
             else :
                 self.notebook_files.SetSelection(select["idx"])
         else :
@@ -397,7 +414,11 @@ class wxpyfw_actions :
 #                self.OpenFile(None)
         except :
             logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
-        
+    
+    def RefreshTree(self, event):
+        select = self.project_tree.GetItemPyData(self.project_tree.GetSelections()[0])
+
+        self.refresh_project_tree(select["path"])
     
     def OpenMenu(self, event):
         select = self.project_tree.GetItemPyData(event.GetItem())
@@ -406,20 +427,7 @@ class wxpyfw_actions :
         try :
             menu = self.res.LoadMenu("menu_tree")
             
-            if select["type"] == "File" :
-                menu.Remove(wx.xrc.XRCID("set_main"))
-                menu.Remove(wx.xrc.XRCID("unset_main"))
-                menu.Remove(wx.xrc.XRCID("tree_find"))
-                menu.Remove(wx.xrc.XRCID("tree_paste"))
-                
-                #menu.Remove(wx.xrc.XRCID("sep3"))
-                #menu.Remove(wx.xrc.XRCID("sep4"))
-                
-                menu.Bind(wx.EVT_MENU, self.OpenFile, id=wx.xrc.XRCID("tree_open"))
-                menu.Bind(wx.EVT_MENU, self.CutFile, id=wx.xrc.XRCID("tree_cut"))
-                menu.Bind(wx.EVT_MENU, self.CopyFile, id=wx.xrc.XRCID("tree_copy"))
-                #wx.xrc.XRCID("open").Enabled(False)
-            elif select["type"] == "Folder" :
+            if select["type"] == "Folder" :
                 #wx.xrc.XRCID("insert").Enabled(False)
                 menu.Remove(wx.xrc.XRCID("set_main"))
                 menu.Remove(wx.xrc.XRCID("unset_main"))
@@ -428,7 +436,8 @@ class wxpyfw_actions :
                 menu.Bind(wx.EVT_MENU, self.NewFile, id=wx.xrc.XRCID("new_file"))
                 menu.Bind(wx.EVT_MENU, self.NewFolder, id=wx.xrc.XRCID("new_folder"))
                 menu.Bind(wx.EVT_MENU, self.PasteFile, id=wx.xrc.XRCID("tree_paste"))
-            else :
+                menu.Bind(wx.EVT_MENU, self.RefreshTree, id=wx.xrc.XRCID("tree_refresh"))
+            elif select["type"] == "Project" :
                 menu.Remove(wx.xrc.XRCID("tree_cut"))
                 menu.Remove(wx.xrc.XRCID("tree_copy"))
                 menu.Remove(wx.xrc.XRCID("tree_open"))
@@ -439,6 +448,24 @@ class wxpyfw_actions :
                 menu.Bind(wx.EVT_MENU, self.NewFile, id=wx.xrc.XRCID("new_file"))
                 menu.Bind(wx.EVT_MENU, self.NewFolder, id=wx.xrc.XRCID("new_folder"))
                 menu.Bind(wx.EVT_MENU, self.PasteFile, id=wx.xrc.XRCID("tree_paste"))
+                menu.Bind(wx.EVT_MENU, self.RefreshTree, id=wx.xrc.XRCID("tree_refresh"))
+            else :
+                menu.Remove(wx.xrc.XRCID("tree_new"))
+                menu.Remove(wx.xrc.XRCID("set_main"))
+                menu.Remove(wx.xrc.XRCID("unset_main"))
+                menu.Remove(wx.xrc.XRCID("tree_find"))
+                menu.Remove(wx.xrc.XRCID("tree_paste"))
+                menu.Remove(wx.xrc.XRCID("tree_refresh"))
+                
+                #menu.Remove(wx.xrc.XRCID("sep3"))
+                #menu.Remove(wx.xrc.XRCID("sep4"))
+                
+                menu.Bind(wx.EVT_MENU, self.OpenFile, id=wx.xrc.XRCID("tree_open"))
+                menu.Bind(wx.EVT_MENU, self.CutFile, id=wx.xrc.XRCID("tree_cut"))
+                menu.Bind(wx.EVT_MENU, self.CopyFile, id=wx.xrc.XRCID("tree_copy"))
+                #wx.xrc.XRCID("open").Enabled(False)
+            
+
                 
             menu.Bind(wx.EVT_MENU, self.TreeDelete, id=wx.xrc.XRCID("tree_delete"))
 
@@ -475,18 +502,18 @@ class view_wxpyfw(wxpyfw_actions):
         self.frame.Bind(wx.EVT_MENU, self.NewProject, id=wx.xrc.XRCID("new_project"))
         self.frame.Bind(wx.EVT_MENU, self.SaveFile, id=wx.xrc.XRCID("save"))
 
-
         self.frame.Bind(wx.EVT_MENU, self.CutLine, id=wx.xrc.XRCID("cut"))
         self.frame.Bind(wx.EVT_MENU, self.CopyLine, id=wx.xrc.XRCID("copy"))
         self.frame.Bind(wx.EVT_MENU, self.PasteLine, id=wx.xrc.XRCID("paste"))
         self.frame.Bind(wx.EVT_MENU, self.DeleteLine, id=wx.xrc.XRCID("delete"))
-
         
         self.frame.Bind(wx.EVT_MENU, self.ToggleComment, id=wx.xrc.XRCID("comment"))
         self.frame.Bind(wx.EVT_MENU, self.DuplicateUp, id=wx.xrc.XRCID("duplicate_up"))
         self.frame.Bind(wx.EVT_MENU, self.DuplicateDw, id=wx.xrc.XRCID("duplicate_dw"))
         
         self.frame.Bind(wx.EVT_MENU, self.LoadOptions, id=wx.xrc.XRCID("options"))
+        
+        self.frame.Bind(wx.EVT_MENU, self.RunProject, id=wx.xrc.XRCID("run"))
         
          #self.frame.SetMenuBar(self.menuBar)
 
@@ -609,30 +636,29 @@ class view_wxpyfw(wxpyfw_actions):
         except :
             logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
             
-    def popolate_widget_tree(self):
-        select = self.project_tree.GetItemPyData(self.project_tree.GetSelections()[0])
-
-        try :
-            for item in self.ParseXRC(select["path"]) :
-                print item
-#            for item in trees :
-#                if type(item) == str:
-#                    newItem = self.project_tree.AppendItem(parent, os.path.basename(item))
-#                    name, ext = os.path.splitext(item)
-#                    if ext not in Icons["ProjectTree"] :
-#                        self.project_tree.SetItemImage(newItem, Icons["ProjectTree"]["*"], wx.TreeItemIcon_Normal)
-#                    else :
-#                        self.project_tree.SetItemImage(newItem, Icons["ProjectTree"][ext], wx.TreeItemIcon_Normal)
+#    def popolate_widget_tree(self):
+#        select = self.project_tree.GetItemPyData(self.project_tree.GetSelections()[0])
 #
-#                    self.project_tree.SetItemPyData(newItem, {'item' : newItem, 'path' : item,  'name' : os.path.basename(item), 'idx' : None, "type" : ext} )
-#                else:
-#                    newItem = self.project_tree.AppendItem(parent, os.path.basename(item[0]))
-#                    self.project_tree.SetItemPyData(newItem, {'item' : newItem, 'path' : item[0],  'name' : os.path.basename(item[0]), 'idx' : None, "type" : "Folder"} )
-#                    self.project_tree.SetItemImage(newItem, Icons["ProjectTree"]["folder"], wx.TreeItemIcon_Normal)
-#                    if len(item)> 1 :
-#                        self.popolate_project_tree(newItem, item[1])
-        except :
-            logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
+#        try :
+#            for item in self.ParseXRC(select["path"]) :
+##            for item in trees :
+##                if type(item) == str:
+##                    newItem = self.project_tree.AppendItem(parent, os.path.basename(item))
+##                    name, ext = os.path.splitext(item)
+##                    if ext not in Icons["ProjectTree"] :
+##                        self.project_tree.SetItemImage(newItem, Icons["ProjectTree"]["*"], wx.TreeItemIcon_Normal)
+##                    else :
+##                        self.project_tree.SetItemImage(newItem, Icons["ProjectTree"][ext], wx.TreeItemIcon_Normal)
+##
+##                    self.project_tree.SetItemPyData(newItem, {'item' : newItem, 'path' : item,  'name' : os.path.basename(item), 'idx' : None, "type" : ext} )
+##                else:
+##                    newItem = self.project_tree.AppendItem(parent, os.path.basename(item[0]))
+##                    self.project_tree.SetItemPyData(newItem, {'item' : newItem, 'path' : item[0],  'name' : os.path.basename(item[0]), 'idx' : None, "type" : "Folder"} )
+##                    self.project_tree.SetItemImage(newItem, Icons["ProjectTree"]["folder"], wx.TreeItemIcon_Normal)
+##                    if len(item)> 1 :
+##                        self.popolate_project_tree(newItem, item[1])
+#        except :
+#            logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
     
     def init_widget_notebook(self):
         try :
@@ -648,7 +674,14 @@ class view_wxpyfw(wxpyfw_actions):
                 self.popolate_widget_notebook(self.widget())
             except :
                 logger.write(sys.exc_value, "ERROR", (self, traceback.extract_stack()))
+    
+    def WriteWidget(self, event):
+        idx = self.notebook_files.GetSelection()
+        file = TAB[idx]
         
+        file["object"].text_editor.AddText(Tools[event.GetId()]["text"])
+        file["object"].text_editor.VCHome()
+                    
     def popolate_widget_notebook(self, widget):
         x = 0
         for inifile in widget :
@@ -681,7 +714,10 @@ class view_wxpyfw(wxpyfw_actions):
                             if "statusbar" in widget[inifile][tabs][tool] :
                                 statusbar = widget[inifile][tabs][tool]["statusbar"]
 
-                            toolbar.AddLabelTool( wx.ID_ANY, label, icon , wx.NullBitmap, wx.ITEM_NORMAL, tooltip, statusbar, None ) 
+                            qtool = toolbar.AddLabelTool( wx.ID_ANY, label, icon , wx.NullBitmap, wx.ITEM_NORMAL, tooltip, statusbar, None) 
+                            Tools[qtool.Id] = widget[inifile][tabs][tool]
+                            
+                            panel.Bind(wx.EVT_TOOL, self.WriteWidget, qtool)
 
                             if "separator" in widget[inifile][tabs][tool] :
                                 toolbar.AddSeparator()    

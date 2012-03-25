@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<resource xmlns="http://www.wxwindows.org/wxxrc" version="2.3.0.1">
+	<frame name="main_frame">
+		<style>wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL</style>
+		<size>wx.Size(1024,640)</size>
+		<title>Frame di esempio</title>
+		<icon>images/16x16/Python.png</icon>
+		<centered>1</centered>
+	</frame>
+</resource>
